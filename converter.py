@@ -34,6 +34,41 @@ def convert_sign(entity, edits):
     entity["Text4"].value = json.loads(entity["Text4"].value)["text"]
     return entity, edits
 
+def convert_spawner(entity, edits, version):
+    entity["id"].value = "MobSpawner"
+    entity["Delay"].value = 0
+    # delete data for next spawn (it wont work anyway)
+    entity.__delitem__('SpawnData')
+    if version == '1.12':
+        for potential in entity["SpawnPotentials"].tags:
+            print(potential.value)
+    elif version == '1.11':
+        #print(entity["SpawnPotentials"].pretty_tree())
+        for potential in entity["SpawnPotentials"].tags:
+            # entity type
+            potential.__setitem__("Type", TAG_String(convert_minecraft_id(potential["Entity"]["id"].value).capitalize()))
+            potential["Entity"].__delitem__("id")
+            # rename 'Entity' to 'Properties'
+            potential["Entity"].name = "Properties"
+            print(potential.pretty_tree())
+    elif (version == '1.10') or (version == '1.9'):
+        entity["id"].value = "MobSpawner"
+        for potential in entity["SpawnPotentials"].tags:
+            entity_type = potential["SpawnPotentials"]["Entity"]["id"].value
+            potential["Type"].value = entity_type
+            entitiy["EntityId"].value = entity_type
+            potential.__delitem__('id')
+            
+            
+        for potential in entity["SpawnPotentials"].tags:
+            print(potential.pretty_tree())
+            potential["Entity"].name = "Properties"
+                
+        
+    else:
+        print("Unable to convert spawner from version " + version)
+    return entity, edits+1
+
 def convert_chunk(chunk, version):
     nbt = chunk["Level"]
     edits = 0
@@ -51,13 +86,16 @@ def convert_chunk(chunk, version):
                 entity, edits = convert_chest(entity, edits)
             if entity["id"].value == "minecraft:sign":
                 entity, edits = convert_sign(entity, edits)
+            if (entity["id"].value == "minecraft:mob_spawner") or (entity["id"].value == "MobSpawner"):
+                entity, edits = convert_spawner(entity, edits, version)
         # display message if any modifications were made
         if edits > 0:
             print("Made %d modifications in Chunk %s,%s (in world at %s,%s):" % (edits,chunk.x,chunk.z,nbt["xPos"],nbt["zPos"]))
     return chunk, edits
 
 def save_chunk(region, chunk):
-    region.write_chunk(chunk.x, chunk.z, chunk)
+    #region.write_chunk(chunk.x, chunk.z, chunk)
+    return
     
 def save_level(level, world_folder):
     level["Data"].__delitem__("Version")
@@ -79,7 +117,8 @@ def main(world_folder):
                     save_chunk(region, chunk)
         if total_edits > 0:
             print("%d modifications made to %s" % (total_edits, world_folder))
-            save_level(level, world_folder)
+            # 1.8 doesn't use this
+            #save_level(level, world_folder)
         else:
             print("Nothing left to convert")
 
