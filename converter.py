@@ -19,6 +19,18 @@ def get_version(level):
         version = "1.8"
     return version
 
+def convert_chest(entity, edits):
+    entity["id"].value = "Chest"
+    edits += 1
+
+def convert_sign(entity, edits):
+    entity["id"].value = "Sign"
+    entity["Text1"].value = json.loads(entity["Text1"].value)["text"]
+    entity["Text2"].value = json.loads(entity["Text2"].value)["text"]
+    entity["Text3"].value = json.loads(entity["Text3"].value)["text"]
+    entity["Text4"].value = json.loads(entity["Text4"].value)["text"]
+    edits += 1
+
 def convert_chunk(chunk):
     nbt = chunk["Level"]
     edits = 0
@@ -32,18 +44,10 @@ def convert_chunk(chunk):
         """
         # go through tile entities
         for entity in nbt["TileEntities"]:
-            # convert chests
             if entity["id"].value == "minecraft:chest":
-                entity["id"].value = "Chest"
-                edits += 1
-            # convert signs
+                convert_chest(entity, edits)
             if entity["id"].value == "minecraft:sign":
-                entity["id"].value = "Sign"
-                entity["Text1"].value = json.loads(entity["Text1"].value)["text"]
-                entity["Text2"].value = json.loads(entity["Text2"].value)["text"]
-                entity["Text3"].value = json.loads(entity["Text3"].value)["text"]
-                entity["Text4"].value = json.loads(entity["Text4"].value)["text"]
-                edits += 1
+                convert_sign(entity, edits)
         # display message if any modifications were made
         if edits > 0:
             print("Made %d modifications in Chunk %s,%s (in world at %s,%s):" % (edits,chunk.x,chunk.z,nbt["xPos"],nbt["zPos"]))
