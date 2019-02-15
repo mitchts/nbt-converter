@@ -6,7 +6,7 @@ Based on https://github.com/twoolie/NBT/blob/master/examples/chest_analysis.py
 import os, sys, nbt, json
 from nbt.world import WorldFolder
 from nbt.region import RegionFile
-from nbt.nbt import NBTFile
+from nbt.nbt import NBTFile, TAG_String
 
 def get_version(level):
     dot = "."
@@ -19,9 +19,12 @@ def get_version(level):
         version = "1.8"
     return version
 
+def convert_minecraft_id(s):
+    return s.split(':')[1]
+
 def convert_chest(entity, edits):
     entity["id"].value = "Chest"
-    edits += 1
+    return entity, edits
 
 def convert_sign(entity, edits):
     entity["id"].value = "Sign"
@@ -29,9 +32,9 @@ def convert_sign(entity, edits):
     entity["Text2"].value = json.loads(entity["Text2"].value)["text"]
     entity["Text3"].value = json.loads(entity["Text3"].value)["text"]
     entity["Text4"].value = json.loads(entity["Text4"].value)["text"]
-    edits += 1
+    return entity, edits
 
-def convert_chunk(chunk):
+def convert_chunk(chunk, version):
     nbt = chunk["Level"]
     edits = 0
     if (len(nbt["Entities"]) > 0) or (len(nbt["TileEntities"]) > 0):
@@ -45,9 +48,9 @@ def convert_chunk(chunk):
         # go through tile entities
         for entity in nbt["TileEntities"]:
             if entity["id"].value == "minecraft:chest":
-                convert_chest(entity, edits)
+                entity, edits = convert_chest(entity, edits)
             if entity["id"].value == "minecraft:sign":
-                convert_sign(entity, edits)
+                entity, edits = convert_sign(entity, edits)
         # display message if any modifications were made
         if edits > 0:
             print("Made %d modifications in Chunk %s,%s (in world at %s,%s):" % (edits,chunk.x,chunk.z,nbt["xPos"],nbt["zPos"]))
@@ -55,26 +58,30 @@ def convert_chunk(chunk):
 
 def save_chunk(region, chunk):
     region.write_chunk(chunk.x, chunk.z, chunk)
+    
+def save_level(level, world_folder):
+    level["Data"].__delitem__("Version")
+    level.write_file(os.path.join(world_folder, "level.dat"))
 
 def main(world_folder):
     world = WorldFolder(world_folder)
     level = NBTFile(os.path.join(world_folder, "level.dat"))
     version = get_version(level)
+    print("\nConverting world located at " + world_folder)
+    print("Level saved as Minecraft version " + version)
     try:
         total_edits = 0
         for region in world.iter_regions():
             for chunk in region.iter_chunks():
-                chunk, chunk_edits = convert_chunk(chunk)
+                chunk, chunk_edits = convert_chunk(chunk, version)
                 total_edits += chunk_edits
                 if chunk_edits > 0:
                     save_chunk(region, chunk)
         if total_edits > 0:
             print("%d modifications made to %s" % (total_edits, world_folder))
-            # 1.8 doesn't use this
-            level["Data"].__delitem__("Version")
-            level.write_file(os.path.join(world_folder, "level.dat"))
+            save_level(level, world_folder)
         else:
-            print("Nothing left to convert in" + world_folder)
+            print("Nothing left to convert")
 
     except KeyboardInterrupt:
         return 75
