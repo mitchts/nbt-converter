@@ -1,8 +1,8 @@
 # nbt-converter
 
-A tool to convert maps created in new Minecraft versions to be usable in 1.8 for [Stratus Network](https://github.com/StratusNetwork). Uses [twoolie/NBT](https://github.com/twoolie/NBT) for inspecting and editing the Minecraft region files.
+A tool to convert maps created in newer Minecraft versions (1.9 to 1.12.2) to be usable in 1.8 for [Stratus Network](https://github.com/StratusNetwork). Uses [twoolie/NBT](https://github.com/twoolie/NBT) for inspecting and editing the Minecraft region files.
 
-This does the absolute minimum to allow Minecraft maps created in newer versions to be used in a 1.8 server environment by converting the NBT and ids (such as `minecraft:chest` to `Chest`) and so on.
+This does the absolute minimum to allow Minecraft maps created in newer versions (1.9 to 1.12.2) to be used in a 1.8 server environment by converting the NBT and ids (such as `minecraft:chest` to `Chest`) and so on.
 
 ## What Works
 
