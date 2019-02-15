@@ -6,7 +6,11 @@ This does the absolute minimum to allow Minecraft maps created in newer versions
 
 ## What Works
 
-Chests and signs. :)
+- Chests (and Trapped Chests)
+- Dispensers
+- Signs
+- Skulls
+- (Item) Spawners
 
 ## Usage
 
