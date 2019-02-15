@@ -34,6 +34,28 @@ def convert_sign(entity, edits):
     entity["Text4"].value = json.loads(entity["Text4"].value)["text"]
     return entity, edits
 
+def convert_spawner(entity, edits):
+    entity["id"].value = "MobSpawner"
+    entity["Delay"].value = 0
+    # default to item unless otherwise set somewhere else
+    entity_type = "Item"
+    # convert data for next spawn
+    entity["SpawnData"].__delitem__("id")
+    if entity["SpawnData"].__contains__("Item"):
+        entity["SpawnData"]["Item"]["id"].value = convert_minecraft_id(entity["SpawnData"]["Item"]["id"].value)
+    # convert spawn potentials
+    for potential in entity["SpawnPotentials"].tags:
+        # entity type
+        potential.__setitem__("Type", TAG_String(convert_minecraft_id(potential["Entity"]["id"].value).capitalize()))
+        potential["Entity"].__delitem__("id")
+        # item conversion
+        if potential["Entity"].__contains__("Item"):
+            potential["Entity"]["Item"]["id"].value = convert_minecraft_id(potential["Entity"]["Item"]["id"].value)
+        # rename 'Entity' to 'Properties'
+        potential["Entity"].name = "Properties"
+    entity.__setitem__("EntityId", TAG_String(entity_type))
+    return entity, edits+1
+
 def convert_chunk(chunk, version):
     nbt = chunk["Level"]
     edits = 0
@@ -51,6 +73,8 @@ def convert_chunk(chunk, version):
                 entity, edits = convert_chest(entity, edits)
             if entity["id"].value == "minecraft:sign":
                 entity, edits = convert_sign(entity, edits)
+            if (entity["id"].value == "minecraft:mob_spawner") or (entity["id"].value == "MobSpawner"):
+                entity, edits = convert_spawner(entity, edits)
         # display message if any modifications were made
         if edits > 0:
             print("Made %d modifications in Chunk %s,%s (in world at %s,%s):" % (edits,chunk.x,chunk.z,nbt["xPos"],nbt["zPos"]))
@@ -69,22 +93,25 @@ def main(world_folder):
     version = get_version(level)
     print("\nConverting world located at " + world_folder)
     print("Level saved as Minecraft version " + version)
-    try:
-        total_edits = 0
-        for region in world.iter_regions():
-            for chunk in region.iter_chunks():
-                chunk, chunk_edits = convert_chunk(chunk, version)
-                total_edits += chunk_edits
-                if chunk_edits > 0:
-                    save_chunk(region, chunk)
-        if total_edits > 0:
-            print("%d modifications made to %s" % (total_edits, world_folder))
-            save_level(level, world_folder)
-        else:
-            print("Nothing left to convert")
+    if version != "1.8":
+        try:
+            total_edits = 0
+            for region in world.iter_regions():
+                for chunk in region.iter_chunks():
+                    chunk, chunk_edits = convert_chunk(chunk, version)
+                    total_edits += chunk_edits
+                    if chunk_edits > 0:
+                        save_chunk(region, chunk)
+            if total_edits > 0:
+                print("%d modifications made to %s" % (total_edits, world_folder))
+                save_level(level, world_folder)
+            else:
+                print("Found nothing to convert")
 
-    except KeyboardInterrupt:
-        return 75
+        except KeyboardInterrupt:
+            return 75
+    else:
+        print("World is already for Minecraft 1.8")
 
     return 0
 
