@@ -11,6 +11,7 @@ This does the absolute minimum to allow Minecraft maps created in newer versions
 - Signs
 - Skulls
 - (Item) Spawners
+- Armor Stands
 
 ## Usage
 

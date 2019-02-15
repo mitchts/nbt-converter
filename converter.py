@@ -22,6 +22,19 @@ def get_version(level):
 def convert_minecraft_id(s):
     return s.split(':')[1]
 
+def convert_armor_stand(entity, edits):
+    entity["id"].value = "ArmorStand"
+    # get data for main hand as off hand doesn't exist
+    holding_item = entity["HandItems"].tags[0]
+    # prepend it to ArmorItems, which will later become Equipment
+    # 0 - Holding Item     3 - Chestplate
+    # 1 - Boots            4 - Helmet
+    # 2 - Leggings
+    entity["ArmorItems"].insert(0, holding_item)
+    entity["ArmorItems"].name = "Equipment"
+    entity.__delitem__("HandItems")
+    return entity, edits+1
+
 def convert_chest(entity, edits):
     entity["id"].value = "Chest"
     return entity, edits+1
@@ -68,13 +81,9 @@ def convert_chunk(chunk, version):
     nbt = chunk["Level"]
     edits = 0
     if (len(nbt["Entities"]) > 0) or (len(nbt["TileEntities"]) > 0):
-        """
-        for entity in chunk["Entities"]:
-            if entity["id"].value == "Minecart" and entity["type"].value == 1:
-                x,y,z = entity["Pos"]
-                x,y,z = x.value,y,value,z.value
-                entities.append(Chest("Minecart with chest",(x,y,z)))
-        """
+        for entity in nbt["Entities"]:
+            if entity["id"].value == "minecraft:armor_stand":
+                entity, edits = convert_armor_stand(entity, edits)
         # go through tile entities
         for entity in nbt["TileEntities"]:
             if entity["id"].value == "minecraft:chest":
