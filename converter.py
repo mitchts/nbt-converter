@@ -26,6 +26,10 @@ def convert_chest(entity, edits):
     entity["id"].value = "Chest"
     return entity, edits
 
+def convert_dispenser(entitiy, edits):
+    entity["id"].value = "Trap"
+    return entity, edits+1
+
 def convert_sign(entity, edits):
     entity["id"].value = "Sign"
     entity["Text1"].value = json.loads(entity["Text1"].value)["text"]
@@ -71,6 +75,8 @@ def convert_chunk(chunk, version):
         for entity in nbt["TileEntities"]:
             if entity["id"].value == "minecraft:chest":
                 entity, edits = convert_chest(entity, edits)
+            if entity["id"].value == "minecraft:dispenser":
+                entity, edits = convert_dispenser(entity, edits)
             if entity["id"].value == "minecraft:sign":
                 entity, edits = convert_sign(entity, edits)
             if (entity["id"].value == "minecraft:mob_spawner") or (entity["id"].value == "MobSpawner"):
