@@ -24,7 +24,7 @@ def convert_minecraft_id(s):
 
 def convert_chest(entity, edits):
     entity["id"].value = "Chest"
-    return entity, edits
+    return entity, edits+1
 
 def convert_dispenser(entitiy, edits):
     entity["id"].value = "Trap"
@@ -36,7 +36,11 @@ def convert_sign(entity, edits):
     entity["Text2"].value = json.loads(entity["Text2"].value)["text"]
     entity["Text3"].value = json.loads(entity["Text3"].value)["text"]
     entity["Text4"].value = json.loads(entity["Text4"].value)["text"]
-    return entity, edits
+    return entity, edits+1
+
+def convert_skull(entitiy, edits):
+    entity["id"].value = "Skull"
+    return entity, edits+1
 
 def convert_spawner(entity, edits):
     entity["id"].value = "MobSpawner"
@@ -79,6 +83,8 @@ def convert_chunk(chunk, version):
                 entity, edits = convert_dispenser(entity, edits)
             if entity["id"].value == "minecraft:sign":
                 entity, edits = convert_sign(entity, edits)
+            if entity["id"].value == "minecraft:skull":
+                entity, edits = convert_skull(entity, edits)
             if (entity["id"].value == "minecraft:mob_spawner") or (entity["id"].value == "MobSpawner"):
                 entity, edits = convert_spawner(entity, edits)
         # display message if any modifications were made
