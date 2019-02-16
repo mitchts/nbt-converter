@@ -22,6 +22,8 @@ This does the absolute minimum to allow Minecraft maps created in newer versions
 #### Items
 
 - Tipped and Spectral Arrows -> Arrows
+- Potions
+  - Lingering Potions -> Splash Potions
 
 ## Usage
 

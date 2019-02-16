@@ -8,7 +8,7 @@ from nbt.world import WorldFolder
 from nbt.region import RegionFile
 from nbt.nbt import NBTFile, TAG_String
 
-VERSION = "1.0.4"
+VERSION = "1.0.5"
 CONTAINERS = ["Chest", "Dispenser", "Dropper", "Cauldron"]
 
 def get_version(level):
@@ -29,6 +29,62 @@ def minecraft_to_simple_id(s):
 def simple_id_to_name(s):
     # mob_spawner -> MobSpawner
     return ''.join(map(lambda x:x.capitalize(),s.split('_')))
+
+def potion_name_to_numeric(p, splash = False):
+    potions = {
+        "regeneration": 8193,
+        "strong_regeneration": 8225,
+        "long_regeneration": 8257,
+        "swiftness": 8194,
+        "strong_swiftness": 8226,
+        "long_swiftness": 8258,
+        "fire_resistance": 8195,
+        "long_fire_resistance": 8259,
+        "poison": 8196,
+        "strong_poison": 8228,
+        "long_poison": 8260,
+        "healing": 8197,
+        "strong_healing": 8229,
+        "night_vision": 8198,
+        "long_night_vision": 8262,
+        "weakness": 8200,
+        "long_weakness": 8264,
+        "strength": 8201,
+        "strong_strength": 8233,
+        "long_strength": 8265,
+        "slowness": 8202,
+        "strong_slowness": 8234,
+        "long_slowness": 8266,
+        "leaping": 8203,
+        "strong_leaping": 8236,
+        "long_leaping": 8267,
+        "harming": 8204,
+        "strong_harming": 8268,
+        "water_breathing": 8205,
+        "long_water_breathing": 8269,
+        "invisibility": 8206,
+        "long_invisibility": 8270
+    }
+
+    # check that potion exists in 1.8 else use a stinky potion
+    # and hope it has some other custom effects
+    p = minecraft_to_simple_id(p)
+    if potions[p]:
+        potion_id = potions[p]
+        # turn off the 13th and turn on 14th to
+        # make it a splash potion variant
+        if splash:
+            potion_id = format(potion_id, 'b')
+            potion_id = int(bin_add(potion_id, '10000000000000'), 2)
+    elif splash:
+        potion_id = 16447
+    else:
+        potion_id = 63
+
+    return potion_id
+
+def bin_add(*args):
+    return bin(sum(int(x, 2) for x in args))[2:]
 
 def convert_armor_stand(entity, edits):
     entity["id"].value = "ArmorStand"
@@ -99,6 +155,20 @@ def convert_spawner(entity, edits):
 
 def convert_arrow_item(item, edits):
     item["id"].value = "minecraft:arrow"
+    return item, edits+1
+
+def convert_potion_item(item, edits):
+    splash = True if item["id"].value in ["minecraft:splash_potion", "minecraft:lingering_potion"] else False
+    item["id"].value = "minecraft:potion"
+    if item["tag"]["Potion"]:
+        item["Damage"].value = potion_name_to_numeric(item["tag"]["Potion"].value, splash)
+        item.__delitem__("tag")
+    elif splash:
+        item["Damage"].value = 16447
+    else:
+        item["Damage"].value = 63
+    return item, edits+1
+
 def convert_chunk(chunk, version):
     nbt = chunk["Level"]
     edits = 0
@@ -115,6 +185,9 @@ def convert_chunk(chunk, version):
             if entity["id"].value == "minecraft:skull": entity, edits = convert_skull(entity, edits)
             if entity["id"].value in ["minecraft:mob_spawner", "MobSpawner"]: entity, edits = convert_spawner(entity, edits)
             if entity["id"].value in CONTAINERS:
+                for item in entity["Items"]:
+                    if item["id"].value in ["minecraft:tipped_arrow", "minecraft:spectral_arrow"]: item, edits = convert_arrow_item(item, edits)
+                    if item["id"].value in ["minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion"]: item, edits = convert_potion_item(item, edits)
         if edits > 0:
             print("Made %d modifications in Chunk %s,%s (in world at %s,%s):" % (edits,chunk.x,chunk.z,nbt["xPos"],nbt["zPos"]))
     return chunk, edits
@@ -146,7 +219,7 @@ def main(world_folder):
                 print("%d modifications made to %s" % (total_edits, world_folder))
                 save_level(level, world_folder)
             else:
-                print("Found nothing to convert")
+                print("No NBT data was changed")
 
         except KeyboardInterrupt:
             return 75
