@@ -8,7 +8,7 @@ from nbt.world import WorldFolder
 from nbt.region import RegionFile
 from nbt.nbt import NBTFile, TAG_String
 
-VERSION = "1.0.1"
+VERSION = "1.0.2"
 
 def get_version(level):
     dot = "."
@@ -21,8 +21,13 @@ def get_version(level):
         version = "1.8"
     return version
 
-def convert_minecraft_id(s):
+def minecraft_to_simple_id(s):
+    # minecraft:mob_spawner -> mob_spawner
     return s.split(':')[1]
+
+def simple_id_to_name(s):
+    # mob_spawner -> MobSpawner
+    return ''.join(map(lambda x:x.capitalize(),s.split('_')))
 
 def convert_armor_stand(entity, edits):
     entity["id"].value = "ArmorStand"
@@ -35,6 +40,14 @@ def convert_armor_stand(entity, edits):
     entity["ArmorItems"].insert(0, holding_item)
     entity["ArmorItems"].name = "Equipment"
     entity.__delitem__("HandItems")
+    return entity, edits+1
+
+def convert_item_frame(entity, edits):
+    entity["id"].value = "ItemFrame"
+    return entity, edits+1
+
+def convert_painting(entitiy, edits):
+    entity["id"].value = "Painting"
     return entity, edits+1
 
 def convert_chest(entity, edits):
@@ -65,15 +78,15 @@ def convert_spawner(entity, edits):
     # convert data for next spawn
     entity["SpawnData"].__delitem__("id")
     if entity["SpawnData"].__contains__("Item"):
-        entity["SpawnData"]["Item"]["id"].value = convert_minecraft_id(entity["SpawnData"]["Item"]["id"].value)
+        entity["SpawnData"]["Item"]["id"].value = minecraft_to_simple_id(entity["SpawnData"]["Item"]["id"].value)
     # convert spawn potentials
     for potential in entity["SpawnPotentials"].tags:
         # entity type
-        potential.__setitem__("Type", TAG_String(convert_minecraft_id(potential["Entity"]["id"].value).capitalize()))
+        potential.__setitem__("Type", TAG_String(minecraft_to_simple_id(potential["Entity"]["id"].value).capitalize()))
         potential["Entity"].__delitem__("id")
         # item conversion
         if potential["Entity"].__contains__("Item"):
-            potential["Entity"]["Item"]["id"].value = convert_minecraft_id(potential["Entity"]["Item"]["id"].value)
+            potential["Entity"]["Item"]["id"].value = minecraft_to_simple_id(potential["Entity"]["Item"]["id"].value)
         # rename 'Entity' to 'Properties'
         potential["Entity"].name = "Properties"
     entity.__setitem__("EntityId", TAG_String(entity_type))
@@ -84,21 +97,15 @@ def convert_chunk(chunk, version):
     edits = 0
     if (len(nbt["Entities"]) > 0) or (len(nbt["TileEntities"]) > 0):
         for entity in nbt["Entities"]:
-            if entity["id"].value == "minecraft:armor_stand":
-                entity, edits = convert_armor_stand(entity, edits)
-        # go through tile entities
+            if entity["id"].value == "minecraft:armor_stand": entity, edits = convert_armor_stand(entity, edits)
+            if entity["id"].value == "minecraft:item_frame": entity, edits = convert_item_frame(entity, edits)
+            if entity["id"].value == "minecraft:painting": entity, edits = convert_painting(entity, edits)
         for entity in nbt["TileEntities"]:
-            if entity["id"].value == "minecraft:chest":
-                entity, edits = convert_chest(entity, edits)
-            if entity["id"].value == "minecraft:dispenser":
-                entity, edits = convert_dispenser(entity, edits)
-            if entity["id"].value == "minecraft:sign":
-                entity, edits = convert_sign(entity, edits)
-            if entity["id"].value == "minecraft:skull":
-                entity, edits = convert_skull(entity, edits)
-            if (entity["id"].value == "minecraft:mob_spawner") or (entity["id"].value == "MobSpawner"):
-                entity, edits = convert_spawner(entity, edits)
-        # display message if any modifications were made
+            if entity["id"].value == "minecraft:chest": entity, edits = convert_chest(entity, edits)
+            if entity["id"].value == "minecraft:dispenser": entity, edits = convert_dispenser(entity, edits)
+            if entity["id"].value == "minecraft:sign": entity, edits = convert_sign(entity, edits)
+            if entity["id"].value == "minecraft:skull": entity, edits = convert_skull(entity, edits)
+            if (entity["id"].value == "minecraft:mob_spawner") or (entity["id"].value == "MobSpawner"): entity, edits = convert_spawner(entity, edits)
         if edits > 0:
             print("Made %d modifications in Chunk %s,%s (in world at %s,%s):" % (edits,chunk.x,chunk.z,nbt["xPos"],nbt["zPos"]))
     return chunk, edits

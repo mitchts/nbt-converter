@@ -12,6 +12,7 @@ This does the absolute minimum to allow Minecraft maps created in newer versions
 - Skulls
 - (Item) Spawners
 - Armor Stands
+- Paintings and Item Frames (not including floor and ceiling frames)
 
 ## Usage
 
