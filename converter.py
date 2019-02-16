@@ -8,7 +8,7 @@ from nbt.world import WorldFolder
 from nbt.region import RegionFile
 from nbt.nbt import NBTFile, TAG_String
 
-VERSION = "1.0.2"
+VERSION = "1.0.3"
 
 def get_version(level):
     dot = "."
@@ -46,7 +46,7 @@ def convert_item_frame(entity, edits):
     entity["id"].value = "ItemFrame"
     return entity, edits+1
 
-def convert_painting(entitiy, edits):
+def convert_painting(entity, edits):
     entity["id"].value = "Painting"
     return entity, edits+1
 
@@ -54,8 +54,12 @@ def convert_chest(entity, edits):
     entity["id"].value = "Chest"
     return entity, edits+1
 
-def convert_dispenser(entitiy, edits):
+def convert_dispenser(entity, edits):
     entity["id"].value = "Trap"
+    return entity, edits+1
+
+def convert_brewing_stand(entity, edits):
+    entity["id"].value = "Cauldron"
     return entity, edits+1
 
 def convert_sign(entity, edits):
@@ -103,6 +107,7 @@ def convert_chunk(chunk, version):
         for entity in nbt["TileEntities"]:
             if entity["id"].value == "minecraft:chest": entity, edits = convert_chest(entity, edits)
             if entity["id"].value == "minecraft:dispenser": entity, edits = convert_dispenser(entity, edits)
+            if entity["id"].value == "minecraft:brewing_stand": entity, edits = convert_brewing_stand(entity, edits)
             if entity["id"].value == "minecraft:sign": entity, edits = convert_sign(entity, edits)
             if entity["id"].value == "minecraft:skull": entity, edits = convert_skull(entity, edits)
             if (entity["id"].value == "minecraft:mob_spawner") or (entity["id"].value == "MobSpawner"): entity, edits = convert_spawner(entity, edits)
