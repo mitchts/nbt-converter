@@ -8,7 +8,8 @@ from nbt.world import WorldFolder
 from nbt.region import RegionFile
 from nbt.nbt import NBTFile, TAG_String
 
-VERSION = "1.0.3"
+VERSION = "1.0.4"
+CONTAINERS = ["Chest", "Dispenser", "Dropper", "Cauldron"]
 
 def get_version(level):
     dot = "."
@@ -96,6 +97,8 @@ def convert_spawner(entity, edits):
     entity.__setitem__("EntityId", TAG_String(entity_type))
     return entity, edits+1
 
+def convert_arrow_item(item, edits):
+    item["id"].value = "minecraft:arrow"
 def convert_chunk(chunk, version):
     nbt = chunk["Level"]
     edits = 0
@@ -110,7 +113,8 @@ def convert_chunk(chunk, version):
             if entity["id"].value == "minecraft:brewing_stand": entity, edits = convert_brewing_stand(entity, edits)
             if entity["id"].value == "minecraft:sign": entity, edits = convert_sign(entity, edits)
             if entity["id"].value == "minecraft:skull": entity, edits = convert_skull(entity, edits)
-            if (entity["id"].value == "minecraft:mob_spawner") or (entity["id"].value == "MobSpawner"): entity, edits = convert_spawner(entity, edits)
+            if entity["id"].value in ["minecraft:mob_spawner", "MobSpawner"]: entity, edits = convert_spawner(entity, edits)
+            if entity["id"].value in CONTAINERS:
         if edits > 0:
             print("Made %d modifications in Chunk %s,%s (in world at %s,%s):" % (edits,chunk.x,chunk.z,nbt["xPos"],nbt["zPos"]))
     return chunk, edits

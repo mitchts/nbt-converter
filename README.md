@@ -6,13 +6,22 @@ This does the absolute minimum to allow Minecraft maps created in newer versions
 
 ## What Works
 
-- Chests (and Trapped Chests)
-- Dispensers
-- Signs
-- Skulls
-- (Item) Spawners
+#### Entities
 - Armor Stands
-- Paintings and Item Frames (not including floor and ceiling frames)
+
+#### Tile Entities
+- Chests (and Trapped Chests)
+- Brewing Stands
+- Dispensers
+- Item Frames (not floor and ceiling frames)
+- Paintings
+- Skulls
+- Signs
+- (Item) Spawners
+
+#### Items
+
+- Tipped and Spectral Arrows -> Arrows
 
 ## Usage
 
