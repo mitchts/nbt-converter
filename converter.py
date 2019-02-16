@@ -8,6 +8,8 @@ from nbt.world import WorldFolder
 from nbt.region import RegionFile
 from nbt.nbt import NBTFile, TAG_String
 
+VERSION = "1.0.1"
+
 def get_version(level):
     dot = "."
     # if version doesn"t exist in this format, its probably already 1.8 (or earlier)
@@ -51,7 +53,7 @@ def convert_sign(entity, edits):
     entity["Text4"].value = json.loads(entity["Text4"].value)["text"]
     return entity, edits+1
 
-def convert_skull(entitiy, edits):
+def convert_skull(entity, edits):
     entity["id"].value = "Skull"
     return entity, edits+1
 
@@ -109,6 +111,7 @@ def save_level(level, world_folder):
     level.write_file(os.path.join(world_folder, "level.dat"))
 
 def main(world_folder):
+    print("Version " + VERSION)
     world = WorldFolder(world_folder)
     level = NBTFile(os.path.join(world_folder, "level.dat"))
     version = get_version(level)
