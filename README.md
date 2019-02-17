@@ -8,6 +8,7 @@ This does the absolute minimum to allow Minecraft maps created in newer versions
 
 #### Entities
 - Armor Stands
+- Minecarts (and Chest and Furnace variants)
 
 #### Tile Entities
 - Chests (and Trapped Chests)

@@ -8,7 +8,7 @@ from nbt.world import WorldFolder
 from nbt.region import RegionFile
 from nbt.nbt import NBTFile, TAG_String
 
-VERSION = "1.0.5"
+VERSION = "1.0.6"
 CONTAINERS = ["Chest", "Dispenser", "Dropper", "Cauldron"]
 
 def get_version(level):
@@ -107,6 +107,18 @@ def convert_painting(entity, edits):
     entity["id"].value = "Painting"
     return entity, edits+1
 
+def convert_minecart(entity, edits):
+    entity["id"].value = "MinecartRideable"
+    return entity, edits+1
+
+def convert_minecart_chest(entity, edits):
+    entity["id"].value = "MinecartChest"
+    return entity, edits+1
+
+def convert_minecart_furnace(entity, edits):
+    entity["id"].value = "MinecartFurnace"
+    return entity, edits+1
+
 def convert_chest(entity, edits):
     entity["id"].value = "Chest"
     return entity, edits+1
@@ -177,6 +189,9 @@ def convert_chunk(chunk, version):
             if entity["id"].value == "minecraft:armor_stand": entity, edits = convert_armor_stand(entity, edits)
             if entity["id"].value == "minecraft:item_frame": entity, edits = convert_item_frame(entity, edits)
             if entity["id"].value == "minecraft:painting": entity, edits = convert_painting(entity, edits)
+            if entity["id"].value == "minecraft:minecart": entity, edits = convert_minecart(entity, edits)
+            if entity["id"].value == "minecraft:chest_minecart": entity, edits = convert_minecart_chest(entity, edits)
+            if entity["id"].value == "minecraft:furnace_minecart": entity, edits = convert_minecart_furnace(entity, edits)
         for entity in nbt["TileEntities"]:
             if entity["id"].value == "minecraft:chest": entity, edits = convert_chest(entity, edits)
             if entity["id"].value == "minecraft:dispenser": entity, edits = convert_dispenser(entity, edits)
