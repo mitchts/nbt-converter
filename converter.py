@@ -8,7 +8,7 @@ from nbt.world import WorldFolder
 from nbt.region import RegionFile
 from nbt.nbt import NBTFile, TAG_String
 
-VERSION = "1.0.6"
+VERSION = "1.0.7"
 CONTAINERS = ["Chest", "Dispenser", "Dropper", "Cauldron"]
 
 def get_version(level):
@@ -69,7 +69,7 @@ def potion_name_to_numeric(p, splash = False):
     # check that potion exists in 1.8 else use a stinky potion
     # and hope it has some other custom effects
     p = minecraft_to_simple_id(p)
-    if potions[p]:
+    if p in potions:
         potion_id = potions[p]
         # turn off the 13th and turn on 14th to
         # make it a splash potion variant
@@ -86,84 +86,105 @@ def potion_name_to_numeric(p, splash = False):
 def bin_add(*args):
     return bin(sum(int(x, 2) for x in args))[2:]
 
-def convert_armor_stand(entity, edits):
-    entity["id"].value = "ArmorStand"
+def convert_living_entity(entity):
+    # TODO
+    return
+
+def convert_armor_stand(stand, edits):
+    stand["id"].value = "ArmorStand"
     # get data for main hand as off hand doesn't exist
-    holding_item = entity["HandItems"].tags[0]
+    holding_item = stand["HandItems"].tags[0]
     # prepend it to ArmorItems, which will later become Equipment
     # 0 - Holding Item     3 - Chestplate
     # 1 - Boots            4 - Helmet
     # 2 - Leggings
-    entity["ArmorItems"].insert(0, holding_item)
-    entity["ArmorItems"].name = "Equipment"
-    entity.__delitem__("HandItems")
-    return entity, edits+1
+    stand["ArmorItems"].insert(0, holding_item)
+    stand["ArmorItems"].name = "Equipment"
+    stand.__delitem__("HandItems")
+    return stand, edits+1
 
-def convert_item_frame(entity, edits):
-    entity["id"].value = "ItemFrame"
-    return entity, edits+1
+def convert_villager(villager, edits):
+    villager["id"].value = "Villager"
+    holding_item = villager["HandItems"].tags[0]
+    villager["ArmorItems"].insert(0, holding_item)
+    villager["ArmorItems"].name = "Equipment"
+    villager.__delitem__("HandItems")
+    for trade in villager["Offers"]["Recipes"].tags:
+        if trade["buy"]["id"].value in ["minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion"]:
+            trade["buy"], temp = convert_potion_item(trade["buy"], 0)
+        else:
+            trade["buy"]["id"].value = minecraft_to_simple_id(trade["buy"]["id"].value)
+        if trade["sell"]["id"].value in ["minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion"]:
+            trade["sell"], temp = convert_potion_item(trade["sell"], 0)
+        else:
+            trade["sell"]["id"].value = minecraft_to_simple_id(trade["sell"]["id"].value)
+    return villager, edits+1
 
-def convert_painting(entity, edits):
-    entity["id"].value = "Painting"
-    return entity, edits+1
+def convert_item_frame(frame, edits):
+    frame["id"].value = "ItemFrame"
+    if frame["Item"]["id"].value in ["minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion"]:
+        frame["Item"], temp = convert_potion_item(frame["Item"], 0) 
+    return frame, edits+1
 
-def convert_minecart(entity, edits):
-    entity["id"].value = "MinecartRideable"
-    return entity, edits+1
+def convert_painting(painting, edits):
+    painting["id"].value = "Painting"
+    return painting, edits+1
 
-def convert_minecart_chest(entity, edits):
-    entity["id"].value = "MinecartChest"
-    return entity, edits+1
+def convert_minecart(minecart, edits):
+    minecart["id"].value = "MinecartRideable"
+    return minecart, edits+1
 
-def convert_minecart_furnace(entity, edits):
-    entity["id"].value = "MinecartFurnace"
-    return entity, edits+1
+def convert_minecart_chest(minecart, edits):
+    minecart["id"].value = "MinecartChest"
+    return minecart, edits+1
 
-def convert_chest(entity, edits):
-    entity["id"].value = "Chest"
-    return entity, edits+1
+def convert_minecart_furnace(minecart, edits):
+    minecart["id"].value = "MinecartFurnace"
+    return minecart, edits+1
 
-def convert_dispenser(entity, edits):
-    entity["id"].value = "Trap"
-    return entity, edits+1
+def convert_chest(chest, edits):
+    chest["id"].value = "Chest"
+    return chest, edits+1
 
-def convert_brewing_stand(entity, edits):
-    entity["id"].value = "Cauldron"
-    return entity, edits+1
+def convert_dispenser(dispenser, edits):
+    dispenser["id"].value = "Trap"
+    return dispenser, edits+1
 
-def convert_sign(entity, edits):
-    entity["id"].value = "Sign"
-    entity["Text1"].value = json.loads(entity["Text1"].value)["text"]
-    entity["Text2"].value = json.loads(entity["Text2"].value)["text"]
-    entity["Text3"].value = json.loads(entity["Text3"].value)["text"]
-    entity["Text4"].value = json.loads(entity["Text4"].value)["text"]
-    return entity, edits+1
+def convert_brewing_stand(stand, edits):
+    stand["id"].value = "Cauldron"
+    return stand, edits+1
 
-def convert_skull(entity, edits):
-    entity["id"].value = "Skull"
-    return entity, edits+1
+def convert_sign(sign, edits):
+    sign["id"].value = "Sign"
+    sign["Text1"].value = json.loads(sign["Text1"].value)["text"]
+    sign["Text2"].value = json.loads(sign["Text2"].value)["text"]
+    sign["Text3"].value = json.loads(sign["Text3"].value)["text"]
+    sign["Text4"].value = json.loads(sign["Text4"].value)["text"]
+    return sign, edits+1
 
-def convert_spawner(entity, edits):
-    entity["id"].value = "MobSpawner"
-    entity["Delay"].value = 0
+def convert_skull(skull, edits):
+    skull["id"].value = "Skull"
+    return skull, edits+1
+
+def convert_spawner(spawner, edits):
+    spawner["id"].value = "MobSpawner"
+    spawner["Delay"].value = 0
     # default to item unless otherwise set somewhere else
     entity_type = "Item"
     # convert data for next spawn
-    entity["SpawnData"].__delitem__("id")
-    if entity["SpawnData"].__contains__("Item"):
-        entity["SpawnData"]["Item"]["id"].value = minecraft_to_simple_id(entity["SpawnData"]["Item"]["id"].value)
+    if spawner["SpawnData"].__contains__("Item"):
+        spawner["SpawnData"]["Item"]["id"].value = minecraft_to_simple_id(spawner["SpawnData"]["Item"]["id"].value)
+        spawner["SpawnData"].__delitem__("id")
     # convert spawn potentials
-    for potential in entity["SpawnPotentials"].tags:
-        # entity type
-        potential.__setitem__("Type", TAG_String(minecraft_to_simple_id(potential["Entity"]["id"].value).capitalize()))
-        potential["Entity"].__delitem__("id")
-        # item conversion
+    for potential in spawner["SpawnPotentials"].tags:
         if potential["Entity"].__contains__("Item"):
+            potential.__setitem__("Type", TAG_String(minecraft_to_simple_id(potential["Entity"]["id"].value).capitalize()))
             potential["Entity"]["Item"]["id"].value = minecraft_to_simple_id(potential["Entity"]["Item"]["id"].value)
+            potential["Entity"].__delitem__("id")
         # rename 'Entity' to 'Properties'
         potential["Entity"].name = "Properties"
-    entity.__setitem__("EntityId", TAG_String(entity_type))
-    return entity, edits+1
+    spawner.__setitem__("EntityId", TAG_String(entity_type))
+    return spawner, edits+1
 
 def convert_arrow_item(item, edits):
     item["id"].value = "minecraft:arrow"
@@ -187,6 +208,7 @@ def convert_chunk(chunk, version):
     if (len(nbt["Entities"]) > 0) or (len(nbt["TileEntities"]) > 0):
         for entity in nbt["Entities"]:
             if entity["id"].value == "minecraft:armor_stand": entity, edits = convert_armor_stand(entity, edits)
+            if entity["id"].value == "minecraft:villager": entity, edits = convert_villager(entity, edits)
             if entity["id"].value == "minecraft:item_frame": entity, edits = convert_item_frame(entity, edits)
             if entity["id"].value == "minecraft:painting": entity, edits = convert_painting(entity, edits)
             if entity["id"].value == "minecraft:minecart": entity, edits = convert_minecart(entity, edits)
