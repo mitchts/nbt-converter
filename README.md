@@ -19,6 +19,7 @@ This does the absolute minimum to allow Minecraft maps created in newer versions
 - Paintings
 - Skulls
 - Signs
+- Banners
 - (Item) Spawners
 
 #### Items

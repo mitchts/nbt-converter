@@ -8,7 +8,7 @@ from nbt.world import WorldFolder
 from nbt.region import RegionFile
 from nbt.nbt import NBTFile, TAG_String
 
-VERSION = "1.0.7"
+VERSION = "1.0.8"
 CONTAINERS = ["Chest", "Dispenser", "Dropper", "Cauldron"]
 
 def get_version(level):
@@ -166,6 +166,10 @@ def convert_skull(skull, edits):
     skull["id"].value = "Skull"
     return skull, edits+1
 
+def convert_banner(banner, edits):
+    banner["id"].value = "Banner"
+    return banner, edits+1
+
 def convert_spawner(spawner, edits):
     spawner["id"].value = "MobSpawner"
     spawner["Delay"].value = 0
@@ -220,6 +224,7 @@ def convert_chunk(chunk, version):
             if entity["id"].value == "minecraft:brewing_stand": entity, edits = convert_brewing_stand(entity, edits)
             if entity["id"].value == "minecraft:sign": entity, edits = convert_sign(entity, edits)
             if entity["id"].value == "minecraft:skull": entity, edits = convert_skull(entity, edits)
+            if entity["id"].value == "minecraft:banner": entity, edits = convert_banner(entity, edits)
             if entity["id"].value in ["minecraft:mob_spawner", "MobSpawner"]: entity, edits = convert_spawner(entity, edits)
             if entity["id"].value in CONTAINERS:
                 for item in entity["Items"]:
