@@ -8,7 +8,7 @@ from nbt.world import WorldFolder
 from nbt.region import RegionFile
 from nbt.nbt import NBTFile, TAG_String
 
-VERSION = "1.0.8"
+VERSION = "1.0.9"
 CONTAINERS = ["Chest", "Dispenser", "Dropper", "Cauldron"]
 
 def get_version(level):
@@ -24,7 +24,10 @@ def get_version(level):
 
 def minecraft_to_simple_id(s):
     # minecraft:mob_spawner -> mob_spawner
-    return s.split(':')[1]
+    if "minecraft:" not in s:
+        return s
+    else:
+        return s.split(':')[1]
 
 def simple_id_to_name(s):
     # mob_spawner -> MobSpawner
