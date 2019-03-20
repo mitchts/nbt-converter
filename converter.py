@@ -9,7 +9,7 @@ from nbt.world import WorldFolder
 from nbt.region import RegionFile
 from nbt.nbt import NBTFile, TAG_String
 
-VERSION = "1.0.11"
+VERSION = "1.0.12"
 CONTAINERS = ["Chest", "Dispenser", "Dropper", "Cauldron"]
 
 def get_version(level):
@@ -36,30 +36,30 @@ def simple_id_to_name(s):
 
 def formatted_json_to_text(str):
     colors = {
-        "black": "§0",
-        "dark_blue": "§1",
-        "dark_green": "§2",
-        "dark_aqua": "§3",
-        "dark_red": "§4",
-        "dark_purple": "§5",
-        "gold": "§6",
-        "gray": "§7",
-        "dark_gray": "§8",
-        "blue": "§9",
-        "green": "§a",
-        "aqua": "§b",
-        "red": "§c",
-        "light_purple": "§d",
-        "yellow": "§e",
-        "white": "§f"
+        "black": u"§0",
+        "dark_blue": u"§1",
+        "dark_green": u"§2",
+        "dark_aqua": u"§3",
+        "dark_red": u"§4",
+        "dark_purple": u"§5",
+        "gold": u"§6",
+        "gray": u"§7",
+        "dark_gray": u"§8",
+        "blue": u"§9",
+        "green": u"§a",
+        "aqua": u"§b",
+        "red": u"§c",
+        "light_purple": u"§d",
+        "yellow": u"§e",
+        "white": u"§f"
     }
     functions = {
-        "magic": "§k",
-        "bold": "§l",
-        "strikethrough": "§m",
-        "underline": "§n",
-        "italic": "§o",
-        "reset": "§r"
+        "magic": u"§k",
+        "bold": u"§l",
+        "strikethrough": u"§m",
+        "underline": u"§n",
+        "italic": u"§o",
+        "reset": u"§r"
     }
     
     # if the sign has multiple colours or specific characters formatted
