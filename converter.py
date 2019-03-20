@@ -8,7 +8,7 @@ from nbt.world import WorldFolder
 from nbt.region import RegionFile
 from nbt.nbt import NBTFile, TAG_String
 
-VERSION = "1.0.10"
+VERSION = "1.0.11"
 CONTAINERS = ["Chest", "Dispenser", "Dropper", "Cauldron"]
 
 def get_version(level):
@@ -31,7 +31,60 @@ def minecraft_to_simple_id(s):
 
 def simple_id_to_name(s):
     # mob_spawner -> MobSpawner
-    return ''.join(map(lambda x:x.capitalize(),s.split('_')))
+    return "".join(map(lambda x:x.capitalize(),s.split("_")))
+
+def formatted_json_to_text(str):
+    colors = {
+        "black": "§0",
+        "dark_blue": "§1",
+        "dark_green": "§2",
+        "dark_aqua": "§3",
+        "dark_red": "§4",
+        "dark_purple": "§5",
+        "gold": "§6",
+        "gray": "§7",
+        "dark_gray": "§8",
+        "blue": "§9",
+        "green": "§a",
+        "aqua": "§b",
+        "red": "§c",
+        "light_purple": "§d",
+        "yellow": "§e",
+        "white": "§f"
+    }
+    functions = {
+        "magic": "§k",
+        "bold": "§l",
+        "strikethrough": "§m",
+        "underline": "§n",
+        "italic": "§o",
+        "reset": "§r"
+    }
+    
+    # if the sign has multiple colours or specific characters formatted
+    # the line will be split up into multiple sections so we need to
+    # seperate each of these and treat them by themselves
+    sections = []
+    json_str = json.loads(str)
+    if "extra" in json_str:
+        for section in json_str["extra"]:
+            sections.append(section)
+    else:
+        sections.append(json_str)
+    
+    # go through the line and apply each of the function to the text
+    # the order must follow color -> functions -> text otherwise it
+    # wont display on the sign properly
+    text = ""
+    for line in sections:
+        if "color" in line: text += colors[line.get("color")]
+        for function in functions:
+            if function in line:
+                text += functions[function]
+        if "text" in line: text += line.get("text")
+        # reset formatting after this section if there are more sections
+        if len(sections) > 1: text += functions["reset"]
+    return text
 
 def potion_name_to_numeric(p, splash = False):
     potions = {
@@ -159,10 +212,10 @@ def convert_brewing_stand(stand, edits):
 
 def convert_sign(sign, edits):
     sign["id"].value = "Sign"
-    sign["Text1"].value = json.loads(sign["Text1"].value)["text"]
-    sign["Text2"].value = json.loads(sign["Text2"].value)["text"]
-    sign["Text3"].value = json.loads(sign["Text3"].value)["text"]
-    sign["Text4"].value = json.loads(sign["Text4"].value)["text"]
+    sign["Text1"].value = formatted_json_to_text(sign["Text1"].value)
+    sign["Text2"].value = formatted_json_to_text(sign["Text2"].value)
+    sign["Text3"].value = formatted_json_to_text(sign["Text3"].value)
+    sign["Text4"].value = formatted_json_to_text(sign["Text4"].value)
     return sign, edits+1
 
 def convert_skull(skull, edits):
@@ -259,8 +312,7 @@ def main(world_folder):
                 for chunk in region.iter_chunks():
                     chunk, chunk_edits = convert_chunk(chunk, version)
                     total_edits += chunk_edits
-                    if chunk_edits > 0:
-                        save_chunk(region, chunk)
+                    if chunk_edits > 0: save_chunk(region, chunk)
             if total_edits > 0:
                 print("%d modifications made to %s" % (total_edits, world_folder))
                 save_level(level, world_folder)
