@@ -8,12 +8,12 @@ from nbt.world import WorldFolder
 from nbt.region import RegionFile
 from nbt.nbt import NBTFile, TAG_String
 
-VERSION = "1.0.9"
+VERSION = "1.0.10"
 CONTAINERS = ["Chest", "Dispenser", "Dropper", "Cauldron"]
 
 def get_version(level):
     dot = "."
-    # if version doesn"t exist in this format, its probably already 1.8 (or earlier)
+    # if version does not exist in this format, its probably already 1.8 (or earlier)
     if level["Data"].__contains__("Version"):
         version = level["Data"]["Version"]["Name"].value
         # get major version
@@ -27,7 +27,7 @@ def minecraft_to_simple_id(s):
     if "minecraft:" not in s:
         return s
     else:
-        return s.split(':')[1]
+        return s.split(":")[1]
 
 def simple_id_to_name(s):
     # mob_spawner -> MobSpawner
@@ -77,8 +77,8 @@ def potion_name_to_numeric(p, splash = False):
         # turn off the 13th and turn on 14th to
         # make it a splash potion variant
         if splash:
-            potion_id = format(potion_id, 'b')
-            potion_id = int(bin_add(potion_id, '10000000000000'), 2)
+            potion_id = format(potion_id, "b")
+            potion_id = int(bin_add(potion_id, "10000000000000"), 2)
     elif splash:
         potion_id = 16447
     else:
@@ -95,7 +95,7 @@ def convert_living_entity(entity):
 
 def convert_armor_stand(stand, edits):
     stand["id"].value = "ArmorStand"
-    # get data for main hand as off hand doesn't exist
+    # get data for main hand as off hand does not exist
     holding_item = stand["HandItems"].tags[0]
     # prepend it to ArmorItems, which will later become Equipment
     # 0 - Holding Item     3 - Chestplate
@@ -188,7 +188,7 @@ def convert_spawner(spawner, edits):
             potential.__setitem__("Type", TAG_String(minecraft_to_simple_id(potential["Entity"]["id"].value).capitalize()))
             potential["Entity"]["Item"]["id"].value = minecraft_to_simple_id(potential["Entity"]["Item"]["id"].value)
             potential["Entity"].__delitem__("id")
-        # rename 'Entity' to 'Properties'
+        # rename "Entity" to "Properties"
         potential["Entity"].name = "Properties"
     spawner.__setitem__("EntityId", TAG_String(entity_type))
     return spawner, edits+1
@@ -230,9 +230,10 @@ def convert_chunk(chunk, version):
             if entity["id"].value == "minecraft:banner": entity, edits = convert_banner(entity, edits)
             if entity["id"].value in ["minecraft:mob_spawner", "MobSpawner"]: entity, edits = convert_spawner(entity, edits)
             if entity["id"].value in CONTAINERS:
-                for item in entity["Items"]:
-                    if item["id"].value in ["minecraft:tipped_arrow", "minecraft:spectral_arrow"]: item, edits = convert_arrow_item(item, edits)
-                    if item["id"].value in ["minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion"]: item, edits = convert_potion_item(item, edits)
+                if entity.__contains__("Items"):
+                    for item in entity["Items"]:
+                        if item["id"].value in ["minecraft:tipped_arrow", "minecraft:spectral_arrow"]: item, edits = convert_arrow_item(item, edits)
+                        if item["id"].value in ["minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion"]: item, edits = convert_potion_item(item, edits)
         if edits > 0:
             print("Made %d modifications in Chunk %s,%s (in world at %s,%s):" % (edits,chunk.x,chunk.z,nbt["xPos"],nbt["zPos"]))
     return chunk, edits
