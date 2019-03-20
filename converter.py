@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 A tool to convert newer entity and tile entity ids to work with 1.8
 Based on https://github.com/twoolie/NBT/blob/master/examples/chest_analysis.py
