@@ -9,7 +9,7 @@ from nbt.world import WorldFolder
 from nbt.region import RegionFile
 from nbt.nbt import NBTFile, TAG_String
 
-VERSION = "1.0.12"
+VERSION = "1.0.13"
 CONTAINERS = ["Chest", "Dispenser", "Dropper", "Cauldron"]
 
 def get_version(level):
@@ -120,7 +120,8 @@ def potion_name_to_numeric(p, splash = False):
         "water_breathing": 8205,
         "long_water_breathing": 8269,
         "invisibility": 8206,
-        "long_invisibility": 8270
+        "long_invisibility": 8270,
+        "water": 0
     }
 
     # check that potion exists in 1.8 else use a stinky potion
@@ -168,11 +169,18 @@ def convert_villager(villager, edits):
     villager.__delitem__("HandItems")
     for trade in villager["Offers"]["Recipes"].tags:
         if trade["buy"]["id"].value in ["minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion"]:
+            # save any item tags for later to reinsert into item
+            tag = None
+            if trade["buy"].__contains__("tag"): tag = trade["buy"]["tag"]
             trade["buy"], temp = convert_potion_item(trade["buy"], 0)
+            if tag is not None: trade["buy"].__setitem__("tag", tag) 
         else:
             trade["buy"]["id"].value = minecraft_to_simple_id(trade["buy"]["id"].value)
         if trade["sell"]["id"].value in ["minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion"]:
+            tag = None
+            if trade["sell"].__contains__("tag"): tag = trade["sell"]["tag"]
             trade["sell"], temp = convert_potion_item(trade["sell"], 0)
+            if tag is not None: trade["sell"].__setitem__("tag", tag) 
         else:
             trade["sell"]["id"].value = minecraft_to_simple_id(trade["sell"]["id"].value)
     return villager, edits+1
