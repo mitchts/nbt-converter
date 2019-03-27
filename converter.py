@@ -9,7 +9,7 @@ from nbt.world import WorldFolder
 from nbt.region import RegionFile
 from nbt.nbt import NBTFile, TAG_String
 
-VERSION = "1.0.13"
+VERSION = "1.0.14"
 CONTAINERS = ["Chest", "Dispenser", "Dropper", "Cauldron"]
 
 def get_version(level):
@@ -169,18 +169,11 @@ def convert_villager(villager, edits):
     villager.__delitem__("HandItems")
     for trade in villager["Offers"]["Recipes"].tags:
         if trade["buy"]["id"].value in ["minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion"]:
-            # save any item tags for later to reinsert into item
-            tag = None
-            if trade["buy"].__contains__("tag"): tag = trade["buy"]["tag"]
             trade["buy"], temp = convert_potion_item(trade["buy"], 0)
-            if tag is not None: trade["buy"].__setitem__("tag", tag) 
         else:
             trade["buy"]["id"].value = minecraft_to_simple_id(trade["buy"]["id"].value)
         if trade["sell"]["id"].value in ["minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion"]:
-            tag = None
-            if trade["sell"].__contains__("tag"): tag = trade["sell"]["tag"]
             trade["sell"], temp = convert_potion_item(trade["sell"], 0)
-            if tag is not None: trade["sell"].__setitem__("tag", tag) 
         else:
             trade["sell"]["id"].value = minecraft_to_simple_id(trade["sell"]["id"].value)
     return villager, edits+1
@@ -264,7 +257,7 @@ def convert_potion_item(item, edits):
     item["id"].value = "minecraft:potion"
     if item["tag"]["Potion"]:
         item["Damage"].value = potion_name_to_numeric(item["tag"]["Potion"].value, splash)
-        item.__delitem__("tag")
+        #item.__delitem__("tag")
     elif splash:
         item["Damage"].value = 16447
     else:
@@ -295,12 +288,7 @@ def convert_chunk(chunk, version):
                 if entity.__contains__("Items"):
                     for item in entity["Items"]:
                         if item["id"].value in ["minecraft:tipped_arrow", "minecraft:spectral_arrow"]: item, edits = convert_arrow_item(item, edits)
-                        if item["id"].value in ["minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion"]:
-                            # save any item tags for later to reinsert into item
-                            tag = None
-                            if item.__contains__("tag"): tag = item["tag"]
-                            item, edits = convert_potion_item(item, edits)
-                            if tag is not None: item.__setitem__("tag", tag) 
+                        if item["id"].value in ["minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion"]: item, edits = convert_potion_item(item, edits)
         if edits > 0:
             print("Made %d modifications in Chunk %s,%s (in world at %s,%s):" % (edits,chunk.x,chunk.z,nbt["xPos"],nbt["zPos"]))
     return chunk, edits
