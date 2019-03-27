@@ -295,7 +295,12 @@ def convert_chunk(chunk, version):
                 if entity.__contains__("Items"):
                     for item in entity["Items"]:
                         if item["id"].value in ["minecraft:tipped_arrow", "minecraft:spectral_arrow"]: item, edits = convert_arrow_item(item, edits)
-                        if item["id"].value in ["minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion"]: item, edits = convert_potion_item(item, edits)
+                        if item["id"].value in ["minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion"]:
+                            # save any item tags for later to reinsert into item
+                            tag = None
+                            if item.__contains__("tag"): tag = item["tag"]
+                            item, edits = convert_potion_item(item, edits)
+                            if tag is not None: item.__setitem__("tag", tag) 
         if edits > 0:
             print("Made %d modifications in Chunk %s,%s (in world at %s,%s):" % (edits,chunk.x,chunk.z,nbt["xPos"],nbt["zPos"]))
     return chunk, edits
