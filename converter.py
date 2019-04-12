@@ -9,7 +9,7 @@ from nbt.world import WorldFolder
 from nbt.region import RegionFile
 from nbt.nbt import NBTFile, TAG_String
 
-VERSION = "1.0.14"
+VERSION = "1.0.15"
 CONTAINERS = ["Chest", "Dispenser", "Dropper", "Cauldron"]
 
 def get_version(level):
@@ -129,8 +129,7 @@ def potion_name_to_numeric(p, splash = False):
     p = minecraft_to_simple_id(p)
     if p in potions:
         potion_id = potions[p]
-        # turn off the 13th and turn on 14th to
-        # make it a splash potion variant
+        # convert to splash potion variant
         if splash:
             potion_id = format(potion_id, "b")
             potion_id = int(bin_add(potion_id, "10000000000000"), 2)
@@ -145,28 +144,25 @@ def bin_add(*args):
     return bin(sum(int(x, 2) for x in args))[2:]
 
 def convert_living_entity(entity):
-    # TODO
-    return
-
-def convert_armor_stand(stand, edits):
-    stand["id"].value = "ArmorStand"
     # get data for main hand as off hand does not exist
-    holding_item = stand["HandItems"].tags[0]
+    holding_item = entity["HandItems"].tags[0]
     # prepend it to ArmorItems, which will later become Equipment
     # 0 - Holding Item     3 - Chestplate
     # 1 - Boots            4 - Helmet
     # 2 - Leggings
-    stand["ArmorItems"].insert(0, holding_item)
-    stand["ArmorItems"].name = "Equipment"
-    stand.__delitem__("HandItems")
+    entity["ArmorItems"].insert(0, holding_item)
+    entity["ArmorItems"].name = "Equipment"
+    entity.__delitem__("HandItems")
+    return entity
+
+def convert_armor_stand(stand, edits):
+    stand["id"].value = "ArmorStand"
+    stand = convert_living_entity(stand)
     return stand, edits+1
 
 def convert_villager(villager, edits):
     villager["id"].value = "Villager"
-    holding_item = villager["HandItems"].tags[0]
-    villager["ArmorItems"].insert(0, holding_item)
-    villager["ArmorItems"].name = "Equipment"
-    villager.__delitem__("HandItems")
+    villager = convert_living_entity(villager)
     for trade in villager["Offers"]["Recipes"].tags:
         if trade["buy"]["id"].value in ["minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion"]:
             trade["buy"], temp = convert_potion_item(trade["buy"], 0)
@@ -229,21 +225,42 @@ def convert_banner(banner, edits):
     return banner, edits+1
 
 def convert_spawner(spawner, edits):
+    # note: spawners are assumed to be only spawning one type of entity, so if the
+    # spawner has many potentials of different types this probably won't work
     spawner["id"].value = "MobSpawner"
     spawner["Delay"].value = 0
-    # default to item unless otherwise set somewhere else
-    entity_type = "Item"
-    # convert data for next spawn
-    if spawner["SpawnData"].__contains__("Item"):
+    if spawner["SpawnData"].__contains__("id"):
+        entity_type = minecraft_to_simple_id(spawner["SpawnData"]["id"].value)
+        entity_type = simple_id_to_name(entity_type)
+    else:
+        entity_type = "Pig"
+    # convert entity for next spawn
+    # item
+    if spawner["SpawnData"].__contains__("Item"): 
         spawner["SpawnData"]["Item"]["id"].value = minecraft_to_simple_id(spawner["SpawnData"]["Item"]["id"].value)
-        spawner["SpawnData"].__delitem__("id")
+    # potion
+    elif spawner["SpawnData"].__contains__("Potion"):
+        spawner["SpawnData"]["Potion"] = convert_potion_item(spawner["SpawnData"]["Potion"])
+        spawner["SpawnData"]["Potion"]["id"].value = minecraft_to_simple_id(spawner["SpawnData"]["Potion"]["id"].value)
+    # living entity
+    elif spawner["SpawnData"].__contains__("ArmorItems"):
+        spawner["SpawnData"] = convert_living_entity(spawner["SpawnData"])
+    spawner["SpawnData"].__delitem__("id")
     # convert spawn potentials
     for potential in spawner["SpawnPotentials"].tags:
+        # item
         if potential["Entity"].__contains__("Item"):
-            potential.__setitem__("Type", TAG_String(minecraft_to_simple_id(potential["Entity"]["id"].value).capitalize()))
             potential["Entity"]["Item"]["id"].value = minecraft_to_simple_id(potential["Entity"]["Item"]["id"].value)
-            potential["Entity"].__delitem__("id")
-        # rename "Entity" to "Properties"
+        # potion
+        elif potential["Entity"].__contains__("Potion"):
+            potential["Entity"]["Potion"] = convert_potion_item(potential["Entity"]["Potion"])
+            # potion entity name is completely different so we have to manually set it here
+            entity_type = "ThrownPotion"
+        # living entity
+        elif potential["Entity"].__contains__("ArmorItems"):
+            potential["Entity"] = convert_living_entity(potential["Entity"])
+        potential.__setitem__("Type", TAG_String(entity_type))
+        potential["Entity"].__delitem__("id")
         potential["Entity"].name = "Properties"
     spawner.__setitem__("EntityId", TAG_String(entity_type))
     return spawner, edits+1
@@ -257,7 +274,6 @@ def convert_potion_item(item, edits):
     item["id"].value = "minecraft:potion"
     if item["tag"]["Potion"]:
         item["Damage"].value = potion_name_to_numeric(item["tag"]["Potion"].value, splash)
-        #item.__delitem__("tag")
     elif splash:
         item["Damage"].value = 16447
     else:

@@ -20,7 +20,7 @@ This does the absolute minimum to allow Minecraft maps created in newer versions
 - Skulls
 - Signs
 - Banners
-- (Item) Spawners
+- Spawners
 
 #### Items
 
