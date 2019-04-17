@@ -9,7 +9,7 @@ from nbt.world import WorldFolder
 from nbt.region import RegionFile
 from nbt.nbt import NBTFile, TAG_String
 
-VERSION = "1.0.14"
+VERSION = "1.0.15"
 CONTAINERS = ["Chest", "Dispenser", "Dropper", "Cauldron"]
 
 def get_version(level):
@@ -228,6 +228,18 @@ def convert_banner(banner, edits):
     banner["id"].value = "Banner"
     return banner, edits+1
 
+def convert_beacon(beacon, edits):
+    beacon["id"].value = "Beacon"
+    return beacon, edits+1
+
+def convert_noteblock(noteblock, edits):
+    noteblock["id"].value = "Music"
+    return noteblock, edits+1
+
+def convert_jukebox(jukebox, edits):
+    jukebox["id"].value = "RecordPlayer"
+    return jukebox, edits+1
+
 def convert_spawner(spawner, edits):
     spawner["id"].value = "MobSpawner"
     spawner["Delay"].value = 0
@@ -283,6 +295,9 @@ def convert_chunk(chunk, version):
             if entity["id"].value == "minecraft:sign": entity, edits = convert_sign(entity, edits)
             if entity["id"].value == "minecraft:skull": entity, edits = convert_skull(entity, edits)
             if entity["id"].value == "minecraft:banner": entity, edits = convert_banner(entity, edits)
+            if entity["id"].value == "minecraft:beacon": entity, edits = convert_beacon(entity, edits)
+            if entity["id"].value == "minecraft:noteblock": entity, edits = convert_noteblock(entity, edits)
+            if entity["id"].value == "minecraft:jukebox": entity, edits = convert_jukebox(entity, edits)
             if entity["id"].value in ["minecraft:mob_spawner", "MobSpawner"]: entity, edits = convert_spawner(entity, edits)
             if entity["id"].value in CONTAINERS:
                 if entity.__contains__("Items"):
