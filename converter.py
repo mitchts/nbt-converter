@@ -7,7 +7,7 @@ Based on https://github.com/twoolie/NBT/blob/master/examples/chest_analysis.py
 import os, sys, nbt, json
 from nbt.world import WorldFolder
 from nbt.region import RegionFile
-from nbt.nbt import NBTFile, TAG_String
+from nbt.nbt import NBTFile, TAG_String, TAG_Short
 
 VERSION = "1.0.16"
 CONTAINERS = ["Chest", "Dispenser", "Dropper", "Cauldron"]
@@ -120,8 +120,7 @@ def potion_name_to_numeric(p, splash = False):
         "water_breathing": 8205,
         "long_water_breathing": 8269,
         "invisibility": 8206,
-        "long_invisibility": 8270,
-        "water": 0
+        "long_invisibility": 8270
     }
 
     # check that potion exists in 1.8 else use a stinky potion
@@ -248,12 +247,12 @@ def convert_spawner(spawner, edits):
         entity_type = "Pig"
     # convert entity for next spawn
     # item
-    if spawner["SpawnData"].__contains__("Item"): 
-        spawner["SpawnData"]["Item"]["id"].value = minecraft_to_simple_id(spawner["SpawnData"]["Item"]["id"].value)
+    #if spawner["SpawnData"].__contains__("Item"): 
+    #    spawner["SpawnData"]["Item"]["id"].value = spawner["SpawnData"]["Item"]["id"].value
     # potion
-    elif spawner["SpawnData"].__contains__("Potion"):
-        spawner["SpawnData"]["Potion"] = convert_potion_item(spawner["SpawnData"]["Potion"])
-        spawner["SpawnData"]["Potion"]["id"].value = minecraft_to_simple_id(spawner["SpawnData"]["Potion"]["id"].value)
+    if spawner["SpawnData"].__contains__("Potion"):
+        spawner["SpawnData"]["Potion"], temp = convert_potion_item(spawner["SpawnData"]["Potion"], 0)
+        spawner["SpawnData"]["Potion"]["id"].value = "potion"
     # living entity
     elif spawner["SpawnData"].__contains__("ArmorItems"):
         spawner["SpawnData"] = convert_living_entity(spawner["SpawnData"])
@@ -261,16 +260,18 @@ def convert_spawner(spawner, edits):
     # convert spawn potentials
     for potential in spawner["SpawnPotentials"].tags:
         # item
-        if potential["Entity"].__contains__("Item"):
-            potential["Entity"]["Item"]["id"].value = minecraft_to_simple_id(potential["Entity"]["Item"]["id"].value)
+        #if potential["Entity"].__contains__("Item"):
+        #    spawner["SpawnData"]["Item"]["id"].value = "Item"
         # potion
-        elif potential["Entity"].__contains__("Potion"):
-            potential["Entity"]["Potion"] = convert_potion_item(potential["Entity"]["Potion"])
+        if potential["Entity"].__contains__("Potion"):
+            potential["Entity"]["Potion"], temp = convert_potion_item(potential["Entity"]["Potion"], 0)
+            potential["Entity"]["Potion"]["id"].value = "potion"
             # potion entity name is completely different so we have to manually set it here
             entity_type = "ThrownPotion"
         # living entity
         elif potential["Entity"].__contains__("ArmorItems"):
             potential["Entity"] = convert_living_entity(potential["Entity"])
+            entity_type = simple_id_to_name(minecraft_to_simple_id(potential["Entity"]["id"].value))
         potential.__setitem__("Type", TAG_String(entity_type))
         potential["Entity"].__delitem__("id")
         potential["Entity"].name = "Properties"
@@ -285,11 +286,16 @@ def convert_potion_item(item, edits):
     splash = True if item["id"].value in ["minecraft:splash_potion", "minecraft:lingering_potion"] else False
     item["id"].value = "minecraft:potion"
     if item["tag"]["Potion"]:
-        item["Damage"].value = potion_name_to_numeric(item["tag"]["Potion"].value, splash)
+        damage = potion_name_to_numeric(item["tag"]["Potion"].value, splash)
+        item["tag"].__delitem__("Potion")
     elif splash:
-        item["Damage"].value = 16447
+        damage = 16447
     else:
-        item["Damage"].value = 63
+        damage = 63
+    if item.__contains__("Damage"):
+        item["Damage"].value = damage
+    else:
+        item.__setitem__("Damage", TAG_Short(damage))
     return item, edits+1
 
 def convert_chunk(chunk, version):
