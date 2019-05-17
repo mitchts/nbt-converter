@@ -9,7 +9,7 @@ from nbt.world import WorldFolder
 from nbt.region import RegionFile
 from nbt.nbt import NBTFile, TAG_String, TAG_Short
 
-VERSION = "1.0.16"
+VERSION = "1.0.17"
 CONTAINERS = ["Chest", "Dispenser", "Dropper", "Cauldron"]
 
 def get_version(level):
