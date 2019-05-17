@@ -9,7 +9,7 @@ from nbt.world import WorldFolder
 from nbt.region import RegionFile
 from nbt.nbt import NBTFile, TAG_String, TAG_Short
 
-VERSION = "1.0.16"
+VERSION = "1.0.17"
 CONTAINERS = ["Chest", "Dispenser", "Dropper", "Cauldron"]
 
 def get_version(level):
@@ -327,7 +327,7 @@ def convert_chunk(chunk, version):
                         if item["id"].value in ["minecraft:tipped_arrow", "minecraft:spectral_arrow"]: item, edits = convert_arrow_item(item, edits)
                         if item["id"].value in ["minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion"]: item, edits = convert_potion_item(item, edits)
         if edits > 0:
-            print("Made %d modifications in Chunk %s,%s (in world at %s,%s):" % (edits,chunk.x,chunk.z,nbt["xPos"],nbt["zPos"]))
+            print("Made %d modifications in Chunk %s,%s (in world at %s,%s)" % (edits,chunk.x,chunk.z,nbt["xPos"],nbt["zPos"]))
     return chunk, edits
 
 def save_chunk(region, chunk):
