@@ -30,4 +30,4 @@ This does the absolute minimum to allow Minecraft maps created in newer versions
 
 ## Usage
 
-`python converter.py '<path to world folder>'`
+`python converter.py <dir> [options]`
