@@ -98,7 +98,6 @@ if __name__ == "__main__":
     usage = "usage: %prog <dir> [options]"
     parser = OptionParser(usage=usage)
     #parser.add_option("-n", dest="nested", help="run through nested folders", default=False, action="store_true")
-    parser.add_option("-b", dest="blocks", help="attempt to convert blocks", default=False, action="store_true")
     (options, args) = parser.parse_args()
 
     if (len(sys.argv) == 1):
