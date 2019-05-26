@@ -5,12 +5,9 @@ to be loaded in Minecraft 1.8 by recreating the NBT structures
 """
 
 import os, sys, nbt
-from io import BytesIO
 from optparse import OptionParser
-from nbt.chunk import AnvilChunk, Chunk
-from nbt.region import Location, MalformedFileError, ChunkDataError
 from nbt.world import WorldFolder
-from nbt.nbt import NBTFile, TAG_Compound, TAG_Int
+from nbt.nbt import NBTFile
 from converter import block as Block
 from converter import entity as Entity
 from converter import tileEntity as TileEntity
@@ -39,26 +36,6 @@ def convert_chunk(chunk, version):
 
 def convert_block(chunk):
     return Block.convert(chunk)
-
-def get_nbt(d):
-    data = d # This may raise a RegionFileFormatError.
-    data = BytesIO(data)
-    err = None
-    try:
-        nbt = NBTFile(buffer=data)
-        nbt.x = d["Level"]["xPos"].value
-        nbt.z = d["Level"]["zPos"].value
-        #if self.loc.x != None:
-        #    x += self.loc.x*32
-        #if self.loc.z != None:
-        #    z += self.loc.z*32
-        nbt.loc = Location(x=x, z=z)
-        return nbt
-        # this may raise a MalformedFileError. Convert to ChunkDataError.
-    except MalformedFileError as e:
-        err = '%s' % e # avoid str(e) due to Unicode issues in Python 2.
-    if err:
-        raise ChunkDataError(err)
 
 def main(world_folder, options):
     print("Version " + VERSION)
