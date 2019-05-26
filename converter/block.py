@@ -1,111 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 Convert Minecraft 1.9 to 1.12.2 blocks to similar blocks
-in appearance as a Minecraft 1.8 replacement
+in appearance or function as a Minecraft 1.8 replacement
 """
 
-CHUNK_HEIGHT = 254
-CHUNK_LENGTH = 16
-
-def get_block_replacement(b):
-    replacements = {
-        198: "", #end rod
-        199: "", #chrous plant
-        200: "", #chrous flower
-        201: "", #purpur block
-        202: "", #purpur pillar
-        203: "", #purpur stairs
-        304: "", #purpur double slab
-        205: "", #purpur slab
-        206: "", #end stone bricks
-        213: "", #magme block
-        214: "", #nether wart block
-        215: "", #red nether brick
-        216: "", #bone block
-        218: "", #observer
-        219: "", #white shulker box
-        220: "", #orange
-        221: "", #magenta
-        222: "", #light blue
-        223: "", #yellow
-        224: "", #lime
-        225: "", #pink
-        226: "", #grey
-        227: "", #light grey
-        228: "", #cyan
-        229: "", #purple
-        230: "", #blue
-        231: "", #brown
-        232: "", #green
-        233: "", #red
-        234: "", #black
-        235: "", #white glazed terracotta
-        236: "", 
-        237: "",
-        238: "",
-        239: "",
-        240: "",
-        241: "",
-        242: "",
-        243: "",
-        244: "",
-        245: "",
-        246: "",
-        257: "",
-        258: "",
-        259: "",
-        260: "",
-        195: "",
-        "White Concrete": "", #white concrete
-        "Orange Concrete": "",
-        "Magenta Concrete": "",
-        "Light Concrete": "",
-        "Yellow Concrete": "",
-        "Lime Concrete": "",
-        "Pink Concrete": "",
-        "Grey Concrete": "",
-        "Light Concrete": "",
-        "Cyan Concrete": "",
-        "Purple Concrete": "",
-        "Blue Concrete": "",
-        "Brown Concrete": "",
-        "Green Concrete": "",
-        "Red Concrete": "",
-        "Black Concrete": "",
-        "White Concrete Powder": "", #white concrete powder
-        "Orange Concrete Powder": "",
-        "Magenta Concrete Powder": "",
-        "Light Concrete Powder": "",
-        "Yellow Concrete Powder": "",
-        "Lime Concrete Powder": "",
-        "Pink Concrete Powder": "",
-        "Grey Concrete Powder": "",
-        "Light Concrete Powder": "",
-        "Cyan Concrete Powder": "",
-        "Purple Concrete Powder": "",
-        "Blue Concrete Powder": "",
-        "Brown Concrete Powder": "",
-        "Green Concrete Powder": "",
-        "Red Concrete Powder": "",
-        "Black Concrete Powser": "",
-        "White Bed": "", #white bed
-        "Orange Bed": "",
-        "Magenta Bed": "",
-        "Light Bed": "",
-        "Yellow Bed": "",
-        "Lime Bed": "",
-        "Pink Bed": "",
-        "Grey Bed": "",
-        "Light Bed": "",
-        "Cyan Bed": "",
-        "Purple Bed": "",
-        "Blue Bed": "",
-        "Brown Bed": "",
-        "Green Bed": "",
-        "Red Bed": "",
-        "Black Bed": ""
-    }
-    
 def fetch_section_blocks(s):
     ids = []
     indexes = []
@@ -132,108 +30,63 @@ def reconstruct_data(ids, indexes):
 
 def convert(chunk):
     replacements = {
-        198: "", #end rod
-        199: "", #chrous plant
-        200: "", #chrous flower
-        201: "", #purpur block
-        202: "", #purpur pillar
-        203: "", #purpur stairs
-        304: "", #purpur double slab
-        205: "", #purpur slab
-        206: "", #end stone bricks
-        213: "", #magme block
-        214: "", #nether wart block
-        215: "", #red nether brick
-        216: "", #bone block
-        218: "", #observer
-        219: "", #white shulker box
-        220: "", #orange shulker box
-        221: "", #magenta shulker box
-        222: "", #light blue shulker box
-        223: "", #yellow shulker box
-        224: "", #lime shulker box
-        225: "", #pink shulker box
-        226: "", #grey shulker box
-        227: "", #light grey shulker box
-        228: "", #cyan shulker box
-        229: "", #purple shulker box
-        230: "", #blue shulker box
-        231: "", #brown shulker box
-        232: "", #green shulker box
-        233: "", #red shulker box
-        234: "", #black shulker box
-        235: "", #white glazed terracotta
-        236: "", 
-        237: "",
-        238: "",
-        239: "",
-        240: "",
-        241: "",
-        242: "",
-        243: "",
-        244: "",
-        245: "",
-        246: "",
-        257: "",
-        258: "",
-        259: "",
-        260: "",
-        195: "",
-        "White Concrete": "", #white concrete
-        "Orange Concrete": "",
-        "Magenta Concrete": "",
-        "Light Concrete": "",
-        "Yellow Concrete": "",
-        "Lime Concrete": "",
-        "Pink Concrete": "",
-        "Grey Concrete": "",
-        "Light Concrete": "",
-        "Cyan Concrete": "",
-        "Purple Concrete": "",
-        "Blue Concrete": "",
-        "Brown Concrete": "",
-        "Green Concrete": "",
-        "Red Concrete": "",
-        "Black Concrete": "",
-        "White Concrete Powder": "", #white concrete powder
-        "Orange Concrete Powder": "",
-        "Magenta Concrete Powder": "",
-        "Light Concrete Powder": "",
-        "Yellow Concrete Powder": "",
-        "Lime Concrete Powder": "",
-        "Pink Concrete Powder": "",
-        "Grey Concrete Powder": "",
-        "Light Concrete Powder": "",
-        "Cyan Concrete Powder": "",
-        "Purple Concrete Powder": "",
-        "Blue Concrete Powder": "",
-        "Brown Concrete Powder": "",
-        "Green Concrete Powder": "",
-        "Red Concrete Powder": "",
-        "Black Concrete Powser": "",
-    }
-    ids = {
-        8: 1,
-        2: 7,
-        3: 103
+        198: 50, #end rod -> torch
+        199: 168, #chrous plant -> prismarine
+        200: 169, #chrous flower -> sea lantern
+        201: 155, #purpur block -> quartz block
+        202: 155, #purpur pillar -> quartz block
+        203: 156, #purpur stairs -> quartz stairs
+        204: 43, #purpur double slab -> double quartz slab
+        205: 44, #purpur slab -> quartz slab
+        206: 121, #end stone bricks -> end stone
+        213: 87, #magma block -> netherrack
+        214: 45, #nether wart block -> brick block
+        215: 112, #red nether brick -> nether brick
+        216: 159, #bone block -> stained clay
+        218: 23, #observer -> dispenser
+        219: 54, #white shulker box -> chest
+        220: 54, #orange shulker box -> chest
+        221: 54, #magenta shulker box -> chest
+        222: 54, #light blue shulker box -> chest
+        223: 54, #yellow shulker box -> chest
+        224: 54, #lime shulker box -> chest
+        225: 54, #pink shulker box -> chest
+        226: 54, #grey shulker box -> chest
+        227: 54, #light grey shulker box -> chest
+        228: 54, #cyan shulker box -> chest
+        229: 54, #purple shulker box -> chest
+        230: 54, #blue shulker box -> chest
+        231: 54, #brown shulker box -> chest
+        232: 54, #green shulker box -> chest
+        233: 54, #red shulker box -> chest
+        234: 54, #black shulker box -> chest
+        235: 159, #white glazed terracotta -> stained clay
+        236: 159, #orange glazed terracotta -> stained clay
+        237: 159, #magenta glazed terracotta -> stained clay
+        238: 159, #light blue glazed terracotta -> stained clay
+        239: 159, #yellow glazed terracotta -> stained clay
+        240: 159, #lime glazed terracotta -> stained clay
+        241: 159, #pink glazed terracotta -> stained clay
+        242: 159, #grey glazed terracotta -> stained clay
+        243: 159, #light grey glazed terracotta -> stained clay
+        244: 159, #cyan glazed terracotta -> stained clay
+        245: 159, #purple glazed terracotta -> stained clay
+        246: 159, #blue glazed terracotta -> stained clay
+        247: 159, #brown glazed terracotta -> stained clay
+        248: 159, #green glazed terracotta -> stained clay
+        249: 159, #red glazed terracotta -> stained clay
+        250: 159, #black glazed terracotta -> stained clay
+        251: 159, #concrete -> stained clay
+        252: 159, #concrete powder -> stained clay
     }
     modified = 0
     for s in chunk['Level']['Sections']:
         block_ids, indexes = fetch_section_blocks(s)
         for i, b in enumerate(block_ids):
-            if b in ids:
-                ref = ids[b]
-                print(block_ids[i], "->", ref)
-                block_ids[i] = ids[b]
-                print(block_ids[i], "=", ref)
+            if b in replacements:
+                block_ids[i] = replacements[b]
                 modified += 1
-            print(block_ids)
         s['Blocks'].value = reconstruct_data(block_ids, indexes)
-        print(s['Blocks'])
-            
-    #return chunk.set_blocks(ids, False)
+
     return chunk, modified
-                #block_id = chunk.get_block_data(x, y, z)
-                #if block_id not in [0]:
-                #    print(block_id)
     

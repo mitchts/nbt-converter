@@ -69,20 +69,20 @@ def main(world_folder, options):
     version = Util.get_version(level)
     print("\nConverting world located at " + world_folder)
     print("Level saved as Minecraft version " + version)
-    if version != "0":
+    if version != "1.8":
         try:
-            total_edits = 0
+            total_nbt_edits = 0
             total_block_edits = 0
             for region in world.iter_regions():
                 for chunk in region.iter_chunks():
-                    chunk, chunk_edits = convert_chunk(chunk, version)
+                    chunk, nbt_edits = convert_chunk(chunk, version)
                     chunk, block_edits = convert_block(chunk)
-                    total_edits += chunk_edits
+                    total_nbt_edits += nbt_edits
                     total_block_edits += block_edits
-                    if chunk_edits > 0 or block_edits > 0: save_chunk(region, chunk)
-            if (total_edits > 0) or (total_block_edits > 0):
-                print("%d modifications made to %s" % (total_edits, world_folder))
-                print("%d modifications made to the blocks" % (total_block_edits))
+                    if nbt_edits > 0 or block_edits > 0: save_chunk(region, chunk)
+            if (total_nbt_edits > 0) or (total_block_edits > 0):
+                if total_edits > 0: print("%d modifications made to %s" % (total_edits, world_folder))
+                if total_block_edits > 0: print("%d modifications made to block section byte arrays" % (total_block_edits))
                 save_level(level, world_folder)
             else:
                 print("No NBT data was changed")
