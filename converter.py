@@ -5,9 +5,13 @@ to be loaded in Minecraft 1.8 by recreating the NBT structures
 """
 
 import os, sys, nbt
+from io import BytesIO
 from optparse import OptionParser
+from nbt.chunk import AnvilChunk, Chunk
+from nbt.region import Location, MalformedFileError, ChunkDataError
 from nbt.world import WorldFolder
-from nbt.nbt import NBTFile
+from nbt.nbt import NBTFile, TAG_Compound, TAG_Int
+from converter import block as Block
 from converter import entity as Entity
 from converter import tileEntity as TileEntity
 from converter import util as Util
@@ -33,6 +37,29 @@ def convert_chunk(chunk, version):
             print("Made %d modifications in Chunk %s,%s (in world at %s,%s)" % (edits,chunk.x,chunk.z,nbt["xPos"],nbt["zPos"]))
     return chunk, edits
 
+def convert_block(chunk):
+    return Block.convert(chunk)
+
+def get_nbt(d):
+    data = d # This may raise a RegionFileFormatError.
+    data = BytesIO(data)
+    err = None
+    try:
+        nbt = NBTFile(buffer=data)
+        nbt.x = d["Level"]["xPos"].value
+        nbt.z = d["Level"]["zPos"].value
+        #if self.loc.x != None:
+        #    x += self.loc.x*32
+        #if self.loc.z != None:
+        #    z += self.loc.z*32
+        nbt.loc = Location(x=x, z=z)
+        return nbt
+        # this may raise a MalformedFileError. Convert to ChunkDataError.
+    except MalformedFileError as e:
+        err = '%s' % e # avoid str(e) due to Unicode issues in Python 2.
+    if err:
+        raise ChunkDataError(err)
+
 def main(world_folder, options):
     print("Version " + VERSION)
     world = WorldFolder(world_folder)
@@ -42,17 +69,21 @@ def main(world_folder, options):
     version = Util.get_version(level)
     print("\nConverting world located at " + world_folder)
     print("Level saved as Minecraft version " + version)
-    if version != "1.8":
+    if version != "0":
         try:
             total_edits = 0
+            total_block_edits = 0
             for region in world.iter_regions():
                 for chunk in region.iter_chunks():
                     chunk, chunk_edits = convert_chunk(chunk, version)
+                    chunk, block_edits = convert_block(chunk)
                     total_edits += chunk_edits
-                    #if chunk_edits > 0: save_chunk(region, chunk)
-            if total_edits > 0:
+                    total_block_edits += block_edits
+                    if chunk_edits > 0 or block_edits > 0: save_chunk(region, chunk)
+            if (total_edits > 0) or (total_block_edits > 0):
                 print("%d modifications made to %s" % (total_edits, world_folder))
-                #save_level(level, world_folder)
+                print("%d modifications made to the blocks" % (total_block_edits))
+                save_level(level, world_folder)
             else:
                 print("No NBT data was changed")
 
