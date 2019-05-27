@@ -16,11 +16,11 @@ def convert_villager(villager):
     villager["id"].value = "Villager"
     for trade in villager["Offers"]["Recipes"].tags:
         if trade["buy"]["id"].value in Util.POTION_TYPES:
-            trade["buy"], temp = Item.convert_potion_item(trade["buy"], 0)
+            trade["buy"] = Item.convert_potion_item(trade["buy"])
         else:
             trade["buy"]["id"].value = Util.minecraft_to_simple_id(trade["buy"]["id"].value)
         if trade["sell"]["id"].value in Util.POTION_TYPES:
-            trade["sell"], temp = Item.convert_potion_item(trade["sell"], 0)
+            trade["sell"] = Item.convert_potion_item(trade["sell"])
         else:
             trade["sell"]["id"].value = Util.minecraft_to_simple_id(trade["sell"]["id"].value)
     return villager
@@ -28,7 +28,7 @@ def convert_villager(villager):
 def convert_item_frame(frame):
     frame["id"].value = "ItemFrame"
     if frame["Item"]["id"].value in Util.POTION_TYPES:
-        frame["Item"], temp = Util.convert_potion_item(frame["Item"], 0) 
+        frame["Item"] = Util.convert_potion_item(frame["Item"]) 
     return frame
 
 def convert_painting(painting):
@@ -68,9 +68,10 @@ def convert(entity, edits):
             entity["ArmorItems"].name = "Equipment"
             entity.__delitem__("HandItems")
         entity = entities[entity_id](entity)
+        edits += 1
     # show message for entities that didn't match
     # but not ones already assumed to be in the right format
     elif entity_id not in IDS:
         print("WARNING: no conversion for entity", entity_id)
 
-    return entity, edits+1
+    return entity, edits

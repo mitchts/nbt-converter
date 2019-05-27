@@ -58,7 +58,7 @@ def main(world_folder, options):
                     total_block_edits += block_edits
                     if nbt_edits > 0 or block_edits > 0: save_chunk(region, chunk)
             if (total_nbt_edits > 0) or (total_block_edits > 0):
-                if total_edits > 0: print("%d modifications made to %s" % (total_edits, world_folder))
+                if total_nbt_edits > 0: print("%d modifications made to %s" % (total_nbt_edits, world_folder))
                 if total_block_edits > 0: print("%d modifications made to block section byte arrays" % (total_block_edits))
                 save_level(level, world_folder)
             else:

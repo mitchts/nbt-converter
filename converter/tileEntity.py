@@ -11,16 +11,30 @@ from . import util as Util
 CONTAINERS = ["Chest", "Dispenser", "Dropper", "Cauldron"]
 IDS = ["Chest", "Trap", "Cauldron", "Sign", "Skull", "Banner", "Beacon", "Music", "RecordPlayer", "MobSpawner"]
 
+def convert_container_contents(tile):
+    if tile.__contains__("Items"):
+        for item in tile["Items"]:
+            item, temp = Item.convert(item, 0)
+    return tile
+
 def convert_chest(chest):
     chest["id"].value = "Chest"
+    chest = convert_container_contents(chest)
     return chest
 
 def convert_dispenser(dispenser):
     dispenser["id"].value = "Trap"
+    dispenser = convert_container_contents(dispenser)
     return dispenser
+
+def convert_dropper(dropper):
+    dropper["id"].value = "Dropper"
+    dropper = convert_container_contents(dropper)
+    return dropper
 
 def convert_brewing_stand(stand):
     stand["id"].value = "Cauldron"
+    stand = convert_container_contents(stand)
     return stand
 
 def convert_sign(sign):
@@ -70,7 +84,7 @@ def convert_spawner(spawner):
         spawner["SpawnData"]["Potion"]["id"].value = "potion"
     # living entity
     elif spawner["SpawnData"].__contains__("ArmorItems"):
-        spawner["SpawnData"] = Entity.convert(spawner["SpawnData"])
+        spawner["SpawnData"], temp = Entity.convert(spawner["SpawnData"], 0)
     spawner["SpawnData"].__delitem__("id")
     # convert spawn potentials
     for potential in spawner["SpawnPotentials"].tags:
@@ -85,7 +99,7 @@ def convert_spawner(spawner):
             entity_type = "ThrownPotion"
         # living entity
         elif potential["Entity"].__contains__("ArmorItems"):
-            potential["Entity"] = Entity.convert(potential["Entity"])
+            potential["Entity"], temp = Entity.convert(potential["Entity"], 0)
             entity_type = Util.minecraft_to_name(potential["Entity"]["id"].value)
         potential.__setitem__("Type", TAG_String(entity_type))
         potential["Entity"].__delitem__("id")
@@ -97,6 +111,7 @@ def convert(tile, edits):
     tiles = {
         "minecraft:chest": convert_chest,
         "minecraft:dispenser": convert_dispenser,
+        "minecraft:dropper": convert_dropper,
         "minecraft:brewing_stand": convert_brewing_stand,
         "minecraft:sign": convert_sign,
         "minecraft:skull": convert_skull,
@@ -111,13 +126,11 @@ def convert(tile, edits):
     # but check that we can actually convert it first
     if tile_id in tiles:
         tile = tiles[tile_id](tile)
+        edits += 1
         if tile_id in CONTAINERS:
-            if tile.__contains__("Items"):
-                for item in tile["Items"]:
-                    item, edits = Item.convert(item, edits)
     # show message for tile entities that didn't match
     # but not ones already assumed to be in the right format
     elif tile_id not in IDS:
         print("WARNING: no conversion for tile entity", tile_id)
 
-    return tile, edits+1
+    return tile, edits

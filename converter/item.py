@@ -39,5 +39,6 @@ def convert(item, edits):
     # but check that we can actually convert it first
     if item_id in items:
         item = items[item_id](item)
+        edits += 1
 
-    return item, edits+1
+    return item, edits
