@@ -28,7 +28,7 @@ def convert_villager(villager):
 def convert_item_frame(frame):
     frame["id"].value = "ItemFrame"
     if frame["Item"]["id"].value in Util.POTION_TYPES:
-        frame["Item"] = Util.convert_potion_item(frame["Item"]) 
+        frame["Item"] = Item.convert_potion_item(frame["Item"]) 
     return frame
 
 def convert_painting(painting):
@@ -60,13 +60,15 @@ def convert(entity, edits):
     entity_id = entity["id"].value
     # convert the entity
     # but check that we can actually convert it first
+    # but _always_ do some basic edits
+    if entity.__contains__("ArmorItems"):
+        # convert any equipment
+        holding_item =  entity["HandItems"].tags[0]
+        entity["ArmorItems"].insert(0, holding_item)
+        entity["ArmorItems"].name = "Equipment"
+        entity.__delitem__("HandItems")
+    entity["id"].value = Util.minecraft_to_name(entity_id)
     if entity_id in entities:
-        if entity.__contains__("ArmorItems"):
-            # convert any equipment
-            holding_item =  entity["HandItems"].tags[0]
-            entity["ArmorItems"].insert(0, holding_item)
-            entity["ArmorItems"].name = "Equipment"
-            entity.__delitem__("HandItems")
         entity = entities[entity_id](entity)
         edits += 1
     # show message for entities that didn't match

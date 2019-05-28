@@ -127,7 +127,6 @@ def convert(tile, edits):
     if tile_id in tiles:
         tile = tiles[tile_id](tile)
         edits += 1
-        if tile_id in CONTAINERS:
     # show message for tile entities that didn't match
     # but not ones already assumed to be in the right format
     elif tile_id not in IDS:
