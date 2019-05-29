@@ -108,6 +108,7 @@ def convert_spawner(spawner):
     return spawner
 
 def convert(tile, edits):
+    tile_id = tile["id"].value
     tiles = {
         "minecraft:chest": convert_chest,
         "minecraft:dispenser": convert_dispenser,
@@ -121,14 +122,14 @@ def convert(tile, edits):
         "minecraft:jukebox": convert_jukebox,
         "minecraft:mob_spawner": convert_spawner
     }
-    tile_id = tile["id"].value
-    # convert the tile entity
-    # but check that we can actually convert it first
+    # apply any special conversions if required
+    # else attempt to convert minecraft id to old name format
     if tile_id in tiles:
         tile = tiles[tile_id](tile)
         edits += 1
-    # show message for tile entities that didn't match
-    # but not ones already assumed to be in the right format
+    else:
+        tile["id"].value = Util.minecraft_to_name(tile_id)
+    # display warning for entities that may not have been converted correctly
     elif tile_id not in IDS:
         print("WARNING: no conversion for tile entity", tile_id)
 

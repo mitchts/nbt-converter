@@ -27,6 +27,7 @@ def convert_potion_item(item):
     return item
 
 def convert(item, edits):
+    item_id = item["id"].value
     items = {
         "minecraft:tipped_arrow": convert_arrow_item,
         "minecraft:spectral_arrow": convert_arrow_item,
@@ -34,9 +35,7 @@ def convert(item, edits):
         "minecraft:splash_potion": convert_potion_item,
         "minecraft:lingering_potion": convert_potion_item
     }
-    item_id = item["id"].value
-    # convert the item
-    # but check that we can actually convert it first
+    # apply any special conversions if required
     if item_id in items:
         item = items[item_id](item)
         edits += 1
