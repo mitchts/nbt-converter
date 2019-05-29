@@ -6,7 +6,7 @@ Convert entities
 from . import item as Item
 from . import util as Util
 
-IDS = ["ArmorStand", "Villager", "ItemFrame", "Painting", "MinecartRideable", "MinecartChest", "MinecartFurnace"]
+IDS = ["ArmorStand", "Villager", "ItemFrame", "Painting", "MinecartRideable", "MinecartChest", "MinecartFurnace", "PigZombie"]
 
 def convert_armor_stand(stand):
     stand["id"].value = "ArmorStand"
@@ -27,8 +27,9 @@ def convert_villager(villager):
 
 def convert_item_frame(frame):
     frame["id"].value = "ItemFrame"
-    if frame["Item"]["id"].value in Util.POTION_TYPES:
-        frame["Item"] = Item.convert_potion_item(frame["Item"]) 
+    if frame.__contains__("Item"):
+        if frame["Item"]["id"].value in Util.POTION_TYPES:
+            frame["Item"] = Item.convert_potion_item(frame["Item"]) 
     return frame
 
 def convert_painting(painting):
@@ -47,7 +48,12 @@ def convert_minecart_furnace(minecart):
     minecart["id"].value = "MinecartFurnace"
     return minecart
 
+def convert_zombie_pigman(zombie):
+    zombie["id"].value = "PigZombie"
+    return zombie
+
 def convert(entity, edits):
+    entity_id = entity["id"].value
     entities = {
         "minecraft:armor_stand": convert_armor_stand,
         "minecraft:villager": convert_villager,
@@ -55,24 +61,23 @@ def convert(entity, edits):
         "minecraft:painting": convert_painting,
         "minecraft:minecart": convert_minecart,
         "minecraft:chest_minecart": convert_minecart_chest,
-        "minecraft:furnace_minecart": convert_minecart_furnace
+        "minecraft:furnace_minecart": convert_minecart_furnace,
+        "minecraft:zombie_pigman": convert_zombie_pigman
     }
-    entity_id = entity["id"].value
-    # convert the entity
-    # but check that we can actually convert it first
-    # but _always_ do some basic edits
+    # convert any equiptment if entity has any
     if entity.__contains__("ArmorItems"):
-        # convert any equipment
         holding_item =  entity["HandItems"].tags[0]
         entity["ArmorItems"].insert(0, holding_item)
         entity["ArmorItems"].name = "Equipment"
         entity.__delitem__("HandItems")
-    entity["id"].value = Util.minecraft_to_name(entity_id)
+    # apply any special conversions if required
+    # else attempt to convert minecraft id to old name format
     if entity_id in entities:
         entity = entities[entity_id](entity)
         edits += 1
-    # show message for entities that didn't match
-    # but not ones already assumed to be in the right format
+    else:
+        entity["id"].value = Util.minecraft_to_name(entity_id)
+    # display warning for entities that may not have been converted correctly
     elif entity_id not in IDS:
         print("WARNING: no conversion for entity", entity_id)
 
