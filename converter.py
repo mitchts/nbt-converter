@@ -13,7 +13,7 @@ from converter import entity as Entity
 from converter import tileEntity as TileEntity
 from converter import util as Util
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 
 def save_chunk(region, chunk):
     region.write_chunk(chunk.x, chunk.z, chunk)
@@ -38,7 +38,6 @@ def convert_block(chunk):
     return Block.convert(chunk)
 
 def main(world_folder, options):
-    print("Version " + VERSION)
     world = WorldFolder(world_folder)
     if not isinstance(world, nbt.world.AnvilWorldFolder):
         parser.error("%s is not an Anvil world" % (world_folder))
@@ -72,17 +71,26 @@ def main(world_folder, options):
     return 0
 
 if __name__ == "__main__":
+    print("Version " + VERSION)
     usage = "usage: %prog <dir> [options]"
     parser = OptionParser(usage=usage)
-    #parser.add_option("-n", dest="nested", help="run through nested folders", default=False, action="store_true")
+    parser.add_option("-r", "--recursive", dest="recursive", help="run through nested folders", default=False, action="store_true")
     (options, args) = parser.parse_args()
 
     if (len(sys.argv) == 1):
         parser.error("No world folder specified")
 
-    world_folder = sys.argv[1]
-    world_folder = os.path.normpath(world_folder)
-    if (not os.path.exists(world_folder)):
-        parser.error("No such folder as " + world_folder)
+    directory = sys.argv[1]
+    directory = os.path.normpath(directory)
+    if (not os.path.exists(directory)):
+        parser.error("No such folder as " + directory)
+        
+    if (options.recursive == True):
+        for dirpath, dirnames, filenames in os.walk(directory):
+            if "region" in dirnames and "level.dat" in filenames:
+                world = os.path.normpath(dirpath)
+                main(world, options)
+    else:
+        main(directory, options)
 
-    sys.exit(main(world_folder, options))
+    sys.exit(0)
