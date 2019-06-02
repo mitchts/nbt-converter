@@ -78,7 +78,7 @@ def convert(entity, edits):
     else:
         entity["id"].value = Util.minecraft_to_name(entity_id)
     # display warning for entities that may not have been converted correctly
-    elif entity_id not in IDS:
+    if entity_id not in IDS:
         print("WARNING: no conversion for entity", entity_id)
 
     return entity, edits

@@ -130,7 +130,7 @@ def convert(tile, edits):
     else:
         tile["id"].value = Util.minecraft_to_name(tile_id)
     # display warning for entities that may not have been converted correctly
-    elif tile_id not in IDS:
+    if tile_id not in IDS:
         print("WARNING: no conversion for tile entity", tile_id)
 
     return tile, edits
