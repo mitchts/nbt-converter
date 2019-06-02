@@ -14,7 +14,7 @@ def convert_armor_stand(stand):
 
 def convert_villager(villager):
     villager["id"].value = "Villager"
-    if vilager.__contains__("Offers"):
+    if villager.__contains__("Offers"):
         for trade in villager["Offers"]["Recipes"].tags:
             if trade["buy"]["id"].value in Util.POTION_TYPES:
                 trade["buy"] = Item.convert_potion_item(trade["buy"])
