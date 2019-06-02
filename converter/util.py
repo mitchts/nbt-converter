@@ -61,11 +61,15 @@ def formatted_json_to_text(str):
         "reset": u"§r"
     }
     
+    text = ""
     # if the sign has multiple colours or specific characters formatted
     # the line will be split up into multiple sections so we need to
     # seperate each of these and treat them by themselves
     sections = []
     json_str = json.loads(str)
+    # return empty string is json is None
+    if json_str is None:
+        return text
     if "extra" in json_str:
         for section in json_str["extra"]:
             sections.append(section)
@@ -75,7 +79,6 @@ def formatted_json_to_text(str):
     # go through the line and apply each of the function to the text
     # the order must follow color -> functions -> text otherwise it
     # wont display on the sign properly
-    text = ""
     for line in sections:
         if "color" in line: text += colors[line.get("color")]
         for function in functions:
