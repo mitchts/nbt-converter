@@ -54,7 +54,7 @@ def main(world_folder, options):
             total_nbt_edits = 0
             total_block_edits = 0
             for region in world.iter_regions():
-                print("Iterating chunks in " + region.filename.rsplit('\\', 1)[1])
+                #print("Iterating chunks in " + region.filename.rsplit('\\', 1)[1])
                 for chunk in region.iter_chunks():
                     chunk, nbt_edits = convert_chunk(chunk)
                     chunk, block_edits = convert_block(chunk)

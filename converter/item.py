@@ -13,7 +13,7 @@ def convert_arrow_item(item):
 def convert_potion_item(item):
     splash = True if item["id"].value in ["minecraft:splash_potion", "minecraft:lingering_potion"] else False
     item["id"].value = "minecraft:potion"
-    if item["tag"]["Potion"]:
+    if item["tag"].__contains__("Potion"):
         damage = Util.potion_name_to_numeric(item["tag"]["Potion"].value, splash)
         item["tag"].__delitem__("Potion")
     elif splash:
