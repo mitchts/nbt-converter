@@ -8,8 +8,8 @@ from . import entity as Entity
 from . import item as Item
 from . import util as Util
 
-CONTAINERS = ["Chest", "Dispenser", "Dropper", "Cauldron"]
-IDS = ["Chest", "Trap", "Cauldron", "Sign", "Skull", "Banner", "Beacon", "Music", "RecordPlayer", "MobSpawner"]
+CONTAINERS = ["Chest", "Furnace", "Dispenser", "Dropper", "Cauldron"]
+IDS = ["Chest", "Furnace", "Trap", "Cauldron", "Sign", "Skull", "Banner", "Beacon", "Music", "RecordPlayer", "MobSpawner"]
 
 def convert_container_contents(tile):
     if tile.__contains__("Items"):
@@ -21,6 +21,11 @@ def convert_chest(chest):
     chest["id"].value = "Chest"
     chest = convert_container_contents(chest)
     return chest
+
+def convert_furnace(furnace):
+    furnace["id"].value = "Furnace"
+    furnace = convert_container_contents(furnace)
+    return furnace
 
 def convert_dispenser(dispenser):
     dispenser["id"].value = "Trap"
@@ -111,6 +116,7 @@ def convert(tile, edits):
     tile_id = tile["id"].value
     tiles = {
         "minecraft:chest": convert_chest,
+        "minecraft:furnace": convert_furnace,
         "minecraft:dispenser": convert_dispenser,
         "minecraft:dropper": convert_dropper,
         "minecraft:brewing_stand": convert_brewing_stand,
