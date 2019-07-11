@@ -13,7 +13,7 @@ from converter import entity as Entity
 from converter import tileEntity as TileEntity
 from converter import util as Util
 
-VERSION = "1.2.1"
+VERSION = "1.2.2"
 
 def save_chunk(region, chunk):
     region.write_chunk(chunk.x, chunk.z, chunk)

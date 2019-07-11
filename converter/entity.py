@@ -77,7 +77,10 @@ def convert(entity, edits):
         entity = entities[entity_id](entity)
         edits += 1
     else:
-        entity["id"].value = Util.minecraft_to_name(entity_id)
+        # attempt to correct entity name and record it as an edit
+        if entity_id != Util.minecraft_to_name(entity_id):
+            entity["id"].value = Util.minecraft_to_name(entity_id)
+            edits += 1
         # display warning for entities that may not have been converted correctly
         if entity_id not in IDS:
             print("WARNING: no conversion for entity", entity_id)
