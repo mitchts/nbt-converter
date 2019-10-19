@@ -22,6 +22,11 @@ def convert_chest(chest):
     chest = convert_container_contents(chest)
     return chest
 
+def convert_shulker_box(box):
+    box["id"].value = "Chest"
+    box = convert_container_contents(box)
+    return box
+
 def convert_furnace(furnace):
     furnace["id"].value = "Furnace"
     furnace = convert_container_contents(furnace)
@@ -116,6 +121,7 @@ def convert(tile, edits):
     tile_id = tile["id"].value
     tiles = {
         "minecraft:chest": convert_chest,
+        "minecraft:shulker_box": convert_shulker_box,
         "minecraft:furnace": convert_furnace,
         "minecraft:dispenser": convert_dispenser,
         "minecraft:dropper": convert_dropper,
