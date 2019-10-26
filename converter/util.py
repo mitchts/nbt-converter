@@ -60,6 +60,7 @@ def formatted_json_to_text(str):
         "italic": u"§o",
         "reset": u"§r"
     }
+    colors.update(functions)
     
     text = ""
     # if the sign has multiple colours or specific characters formatted
