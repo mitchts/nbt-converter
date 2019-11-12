@@ -144,3 +144,20 @@ def potion_name_to_numeric(p, splash = False):
 
 def bin_add(*args):
     return bin(sum(int(x, 2) for x in args))[2:]
+
+def convert_entity_id(entity):
+    # legacy IDs which are different to the minecraft ID
+    legacy = {
+        "minecraft:falling_block": "FallingSand",
+        "minecraft:potion": "ThrownPotion",
+        "minecraft:zombie_pigman": "PigZombie",
+        "minecraft:tnt": "PrimedTnt"
+    }
+    # see if there is a legacy ID available
+    # else try an automatic conversion
+    if entity in legacy:
+        new_id = legacy[entity]
+    else:
+        new_id = minecraft_to_name(entity)
+    
+    return new_id
