@@ -81,7 +81,7 @@ def convert_spawner(spawner):
     spawner["id"].value = "MobSpawner"
     spawner["Delay"].value = 0
     if spawner["SpawnData"].__contains__("id"):
-        entity_type = Util.minecraft_to_name(spawner["SpawnData"]["id"].value)
+        entity_type = Util.convert_entity_id(spawner["SpawnData"]["id"].value)
     else:
         entity_type = "Pig"
     # convert entity for next spawn
