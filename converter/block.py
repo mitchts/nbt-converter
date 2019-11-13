@@ -39,6 +39,7 @@ def convert(chunk):
         204: 43, #purpur double slab -> double quartz slab
         205: 44, #purpur slab -> quartz slab
         206: 121, #end stone bricks -> end stone
+        208: 3, #path -> dirt
         213: 87, #magma block -> netherrack
         214: 45, #nether wart block -> brick block
         215: 112, #red nether brick -> nether brick
