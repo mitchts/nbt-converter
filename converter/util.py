@@ -123,7 +123,8 @@ def potion_name_to_numeric(p, splash = False):
         "water_breathing": 8205,
         "long_water_breathing": 8269,
         "invisibility": 8206,
-        "long_invisibility": 8270
+        "long_invisibility": 8270,
+        "water": 0
     }
 
     # check that potion exists in 1.8 else use a stinky potion
