@@ -117,10 +117,22 @@ def convert_spawner(spawner):
     spawner.__setitem__("EntityId", TAG_String(entity_type))
     return spawner
 
+def convert_legacy_spawner(spawner):
+    # there are cases where spawners are effectively 1.8 but missing
+    # the EntitiyId tag which is fucking stupid
+    if not spawner.__contains__("EntityId"):
+        if spawner["SpawnData"].__contains__("id"):
+            entity_type = Util.convert_entity_id(spawner["SpawnData"]["id"].value)
+        else:
+            entity_type = "Pig"
+        spawner.__setitem__("EntityId", TAG_String(entity_type))
+    return spawner
+
 def convert(tile, edits):
     tile_id = tile["id"].value
     tiles = {
         "minecraft:chest": convert_chest,
+        "Chest": convert_chest,
         "minecraft:shulker_box": convert_shulker_box,
         "minecraft:furnace": convert_furnace,
         "minecraft:dispenser": convert_dispenser,
@@ -132,7 +144,8 @@ def convert(tile, edits):
         "minecraft:beacon": convert_beacon,
         "minecraft:noteblock": convert_noteblock,
         "minecraft:jukebox": convert_jukebox,
-        "minecraft:mob_spawner": convert_spawner
+        "minecraft:mob_spawner": convert_spawner,
+        "MobSpawner": convert_legacy_spawner
     }
     # apply any special conversions if required
     # else attempt to convert minecraft id to old name format
