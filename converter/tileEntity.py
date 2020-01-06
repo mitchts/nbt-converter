@@ -75,56 +75,47 @@ def convert_jukebox(jukebox):
     jukebox["id"].value = "RecordPlayer"
     return jukebox
 
+# note: spawners are assumed to be only spawning one type of entity, so if the
+# spawner has many potentials of different types this probably won't work
 def convert_spawner(spawner):
-    # note: spawners are assumed to be only spawning one type of entity, so if the
-    # spawner has many potentials of different types this probably won't work
-    spawner["id"].value = "MobSpawner"
-    spawner["Delay"].value = 0
-    if spawner["SpawnData"].__contains__("id"):
-        entity_type = Util.convert_entity_id(spawner["SpawnData"]["id"].value)
-    else:
-        entity_type = "Pig"
-    # convert entity for next spawn
-    # item
-    #if spawner["SpawnData"].__contains__("Item"): 
-    #    spawner["SpawnData"]["Item"]["id"].value = spawner["SpawnData"]["Item"]["id"].value
-    # potion
-    if spawner["SpawnData"].__contains__("Potion"):
-        spawner["SpawnData"]["Potion"] = Item.convert_potion_item(spawner["SpawnData"]["Potion"])
-        spawner["SpawnData"]["Potion"]["id"].value = "potion"
-    # living entity
-    elif spawner["SpawnData"].__contains__("ArmorItems"):
-        spawner["SpawnData"], temp = Entity.convert(spawner["SpawnData"], 0)
-    spawner["SpawnData"].__delitem__("id")
-    # convert spawn potentials
-    for potential in spawner["SpawnPotentials"].tags:
-        # item
-        #if potential["Entity"].__contains__("Item"):
-        #    spawner["SpawnData"]["Item"]["id"].value = "Item"
-        # potion
-        if potential["Entity"].__contains__("Potion"):
-            potential["Entity"]["Potion"] = Item.convert_potion_item(potential["Entity"]["Potion"])
-            potential["Entity"]["Potion"]["id"].value = "potion"
-            # potion entity name is completely different so we have to manually set it here
-            entity_type = "ThrownPotion"
-        # living entity
-        elif potential["Entity"].__contains__("ArmorItems"):
-            potential["Entity"], temp = Entity.convert(potential["Entity"], 0)
-            entity_type = Util.minecraft_to_name(potential["Entity"]["id"].value)
-        potential.__setitem__("Type", TAG_String(entity_type))
-        potential["Entity"].__delitem__("id")
-        potential["Entity"].name = "Properties"
-    spawner.__setitem__("EntityId", TAG_String(entity_type))
-    return spawner
-
-def convert_legacy_spawner(spawner):
-    # there are cases where spawners are effectively 1.8 but missing
-    # the EntitiyId tag which is fucking stupid
+    # check if legacy spawner is already converted
     if not spawner.__contains__("EntityId"):
+        spawner["id"].value = "MobSpawner"
+        spawner["Delay"].value = 0
         if spawner["SpawnData"].__contains__("id"):
             entity_type = Util.convert_entity_id(spawner["SpawnData"]["id"].value)
         else:
             entity_type = "Pig"
+        # convert entity for next spawn
+        # item
+        if spawner["SpawnData"].__contains__("Item"): 
+            spawner["SpawnData"]["Item"]["id"].value = Util.minecraft_to_simple_id(spawner["SpawnData"]["Item"]["id"].value)
+        # potion
+        if spawner["SpawnData"].__contains__("Potion"):
+            spawner["SpawnData"]["Potion"] = Item.convert_potion_item(spawner["SpawnData"]["Potion"])
+            spawner["SpawnData"]["Potion"]["id"].value = "potion"
+        # living entity
+        elif spawner["SpawnData"].__contains__("ArmorItems"):
+            spawner["SpawnData"], temp = Entity.convert(spawner["SpawnData"], 0)
+        spawner["SpawnData"].__delitem__("id")
+        # convert spawn potentials
+        for potential in spawner["SpawnPotentials"].tags:
+            # item
+            if potential["Entity"].__contains__("Item"):
+                spawner["SpawnData"]["Item"]["id"].value = Util.minecraft_to_simple_id(spawner["SpawnData"]["Item"]["id"].value)
+            # potion
+            if potential["Entity"].__contains__("Potion"):
+                potential["Entity"]["Potion"] = Item.convert_potion_item(potential["Entity"]["Potion"])
+                potential["Entity"]["Potion"]["id"].value = "potion"
+                # potion entity name is completely different so we have to manually set it here
+                entity_type = "ThrownPotion"
+            # living entity
+            elif potential["Entity"].__contains__("ArmorItems"):
+                potential["Entity"], temp = Entity.convert(potential["Entity"], 0)
+                entity_type = Util.minecraft_to_name(potential["Entity"]["id"].value)
+            potential.__setitem__("Type", TAG_String(entity_type))
+            potential["Entity"].__delitem__("id")
+            potential["Entity"].name = "Properties"
         spawner.__setitem__("EntityId", TAG_String(entity_type))
     return spawner
 
@@ -145,7 +136,7 @@ def convert(tile, edits):
         "minecraft:noteblock": convert_noteblock,
         "minecraft:jukebox": convert_jukebox,
         "minecraft:mob_spawner": convert_spawner,
-        "MobSpawner": convert_legacy_spawner
+        "MobSpawner": convert_spawner
     }
     # apply any special conversions if required
     # else attempt to convert minecraft id to old name format

@@ -13,7 +13,7 @@ from converter import entity as Entity
 from converter import tileEntity as TileEntity
 from converter import util as Util
 
-VERSION = "1.2.7"
+VERSION = "1.2.8"
 
 def save_chunk(region, chunk):
     region.write_chunk(chunk.x, chunk.z, chunk)
@@ -31,7 +31,7 @@ def convert_chunk(chunk):
         for tile in nbt["TileEntities"]:
             tile, edits = TileEntity.convert(tile, edits)
         if edits > 0:
-            print("Made %d modifications in Chunk %s,%s (in world at %s,%s)" % (edits,chunk.x,chunk.z,nbt["xPos"],nbt["zPos"]))
+            print("Made %d modifications in Chunk %s,%s (in world at %s,%s)" % (edits, chunk.x, chunk.z, nbt["xPos"], nbt["zPos"]))
     return chunk, edits
 
 def convert_block(chunk):
@@ -54,17 +54,21 @@ def main(world_folder, options):
             total_nbt_edits = 0
             total_block_edits = 0
             for region in world.iter_regions():
-                #print("Iterating chunks in " + region.filename.rsplit('\\', 1)[1])
                 for chunk in region.iter_chunks():
                     chunk, nbt_edits = convert_chunk(chunk)
                     chunk, block_edits = convert_block(chunk)
                     total_nbt_edits += nbt_edits
                     total_block_edits += block_edits
-                    if nbt_edits > 0 or block_edits > 0: save_chunk(region, chunk)
-            if (total_nbt_edits > 0) or (total_block_edits > 0):
-                if total_nbt_edits > 0: print("%d modifications made to the level nbt" % (total_nbt_edits))
-                if total_block_edits > 0: print("%d modifications made to block section byte arrays" % (total_block_edits))
-                save_level(level, world_folder)
+                    if options.save and nbt_edits > 0 or block_edits > 0:
+                        save_chunk(region, chunk)
+            if total_nbt_edits > 0 or total_block_edits > 0:
+                if total_nbt_edits > 0 or total_block_edits > 0: 
+                    print("%d modifications made to the level nbt" % (total_nbt_edits))
+                    print("%d modifications made to block section byte arrays" % (total_block_edits))
+                if options.save:
+                    save_level(level, world_folder)
+                else:
+                    print("No modifications saved to the level nbt")
             else:
                 print("No NBT data was changed")
         except KeyboardInterrupt:
@@ -79,17 +83,18 @@ if __name__ == "__main__":
     usage = "usage: %prog <dir> [options]"
     parser = OptionParser(usage=usage)
     parser.add_option("-r", "--recursive", dest="recursive", help="run through nested folders", default=False, action="store_true")
+    parser.add_option("-n", "--no-save", dest="save", help="do not save modifications made", default=True, action="store_false")
     (options, args) = parser.parse_args()
 
-    if (len(sys.argv) == 1):
+    if len(sys.argv) == 1:
         parser.error("No world folder specified")
 
     directory = sys.argv[1]
     directory = os.path.normpath(directory)
-    if (not os.path.exists(directory)):
+    if not os.path.exists(directory):
         parser.error("No such folder as " + directory)
 
-    if (options.recursive == True):
+    if options.recursive == True:
         for dirpath, dirnames, filenames in os.walk(directory):
             if "region" in dirnames and "level.dat" in filenames:
                 world = os.path.normpath(dirpath)
