@@ -82,7 +82,7 @@ def main(world_folder, options):
     else:
         print("Level is already saved for Minecraft 1.8 (or older)")
 
-    if options.disable_keep_inv:
+    if options.disable_keep_inv and options.save:
         disable_keep_inv(level, world_folder)
 
     return 0
