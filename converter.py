@@ -13,7 +13,7 @@ from converter import entity as Entity
 from converter import tileEntity as TileEntity
 from converter import util as Util
 
-VERSION = "1.2.8"
+VERSION = "1.2.9"
 
 def save_chunk(region, chunk):
     region.write_chunk(chunk.x, chunk.z, chunk)
@@ -36,6 +36,13 @@ def convert_chunk(chunk):
 
 def convert_block(chunk):
     return Block.convert(chunk)
+
+def disable_keep_inv(level, world_folder):
+    if level["Data"].__contains__("GameRules"):
+        if level["Data"]["GameRules"].__contains__("keepInventory"):
+            level["Data"]["GameRules"]["keepInventory"].value = "false";
+    level.write_file(os.path.join(world_folder, "level.dat"))
+    print("keepInventory gamerule has been turned off")
 
 def main(world_folder, options):
     world = WorldFolder(world_folder)
@@ -75,6 +82,9 @@ def main(world_folder, options):
     else:
         print("Level is already saved for Minecraft 1.8 (or older)")
 
+    if options.disable_keep_inv:
+        disable_keep_inv(level, world_folder)
+
     return 0
 
 if __name__ == "__main__":
@@ -82,6 +92,7 @@ if __name__ == "__main__":
     usage = "usage: %prog <dir> [options]"
     parser = OptionParser(usage=usage)
     parser.add_option("-r", "--recursive", dest="recursive", help="run through nested folders", default=False, action="store_true")
+    parser.add_option("-k", "--keep-inventory", dest="disable_keep_inv", help="turn the keepInventory gamerule off", default=False, action="store_true")
     parser.add_option("-n", "--no-save", dest="save", help="do not save modifications made", default=True, action="store_false")
     (options, args) = parser.parse_args()
 
