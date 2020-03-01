@@ -26,6 +26,10 @@ def convert_potion_item(item):
         item.__setitem__("Damage", TAG_Short(damage))
     return item
 
+def convert_boat_item(item):
+    item["id"].value = "minecraft:boat"
+    return item
+
 def convert(item, edits):
     item_id = item["id"].value
     items = {
@@ -33,7 +37,12 @@ def convert(item, edits):
         "minecraft:spectral_arrow": convert_arrow_item,
         "minecraft:potion": convert_potion_item,
         "minecraft:splash_potion": convert_potion_item,
-        "minecraft:lingering_potion": convert_potion_item
+        "minecraft:lingering_potion": convert_potion_item,
+        "minecraft:spruce_boat": convert_boat_item,
+        "minecraft:birch_boat": convert_boat_item,
+        "minecraft:jungle_boat": convert_boat_item,
+        "minecraft:acacia_boat": convert_boat_item,
+        "minecraft:dark_oak_boat": convert_boat_item
     }
     # apply any special conversions if required
     if item_id in items:
