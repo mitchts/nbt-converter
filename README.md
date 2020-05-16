@@ -12,7 +12,7 @@ Certain objects have been provided with specific conversions, however, the scrip
 
 ## Usage
 
-Make sure you have Python installed. Recommended versions are 2.7, 3.4 to 3.7.
+Make sure you have Python 3 or newer installed.
 
 Open a terminal in the script location and run:
 

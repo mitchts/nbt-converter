@@ -13,17 +13,20 @@ def convert_arrow_item(item):
 def convert_potion_item(item):
     splash = True if item["id"].value in ["minecraft:splash_potion", "minecraft:lingering_potion"] else False
     item["id"].value = "minecraft:potion"
-    if item["tag"].__contains__("Potion"):
-        damage = Util.potion_name_to_numeric(item["tag"]["Potion"].value, splash)
-        item["tag"].__delitem__("Potion")
-    elif splash:
-        damage = 16447
-    else:
-        damage = 63
-    if item.__contains__("Damage"):
-        item["Damage"].value = damage
-    else:
-        item.__setitem__("Damage", TAG_Short(damage))
+    # if the potion doesn't contain "tag"
+    # we can assume it's likely a 1.8 potion already
+    if item.__contains__("tag"):
+        if item["tag"].__contains__("Potion"):
+            damage = Util.potion_name_to_numeric(item["tag"]["Potion"].value, splash)
+            item["tag"].__delitem__("Potion")
+        elif splash:
+            damage = 16447
+        else:
+            damage = 63
+        if item.__contains__("Damage"):
+            item["Damage"].value = damage
+        else:
+            item.__setitem__("Damage", TAG_Short(damage))
     return item
 
 def convert_boat_item(item):

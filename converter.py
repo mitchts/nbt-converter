@@ -13,7 +13,7 @@ from converter import entity as Entity
 from converter import tileEntity as TileEntity
 from converter import util as Util
 
-VERSION = "1.2.10"
+VERSION = "1.3.0"
 
 def save_chunk(region, chunk):
     region.write_chunk(chunk.x, chunk.z, chunk)
@@ -25,13 +25,16 @@ def save_level(level, world_folder):
 def convert_chunk(chunk):
     nbt = chunk["Level"]
     edits = 0
+    entity_edits = 0
+    tile_edits = 0
     if (len(nbt["Entities"]) > 0) or (len(nbt["TileEntities"]) > 0):
+        print("Inspecting Chunk %+5s: " % (Util.format_chunk(nbt["xPos"], nbt["zPos"])), end="")
         for entity in nbt["Entities"]:
-            entity, edits = Entity.convert(entity, edits)
+            entity, entity_edits = Entity.convert(entity, entity_edits)
         for tile in nbt["TileEntities"]:
-            tile, edits = TileEntity.convert(tile, edits)
-        if edits > 0:
-            print("Made %d modifications in Chunk %s,%s (in world at %s,%s)" % (edits, chunk.x, chunk.z, nbt["xPos"], nbt["zPos"]))
+            tile, tile_edits = TileEntity.convert(tile, tile_edits)
+        edits = entity_edits + tile_edits
+        print("%d modifications made (%d Entities, %d TileEntities)" % (edits, entity_edits, tile_edits))
     return chunk, edits
 
 def convert_block(chunk):
@@ -74,9 +77,9 @@ def main(world_folder, options):
                 if options.save:
                     save_level(level, world_folder)
                 else:
-                    print("No modifications saved to the level nbt")
+                    print("No modifications saved to level (using -n flag)")
             else:
-                print("No NBT data was changed")
+                print("No level data was changed (nothing to modify)")
         except KeyboardInterrupt:
             return 75
     else:

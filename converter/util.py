@@ -18,6 +18,9 @@ def get_version(level):
         version = "1.8"
     return version
 
+def format_chunk(x, z):
+    return str(x) + "," + str(z)
+
 def minecraft_to_simple_id(s):
     # minecraft:mob_spawner -> mob_spawner
     if "minecraft:" not in s:
