@@ -19,8 +19,9 @@ def save_chunk(region, chunk):
     region.write_chunk(chunk.x, chunk.z, chunk)
 
 def save_level(level, world_folder):
-    level["Data"].__delitem__("Version")
-    level.write_file(os.path.join(world_folder, "level.dat"))
+    if level["Data"].__contains__("Version"):
+        level["Data"].__delitem__("Version")
+        level.write_file(os.path.join(world_folder, "level.dat"))
 
 def convert_chunk(chunk):
     nbt = chunk["Level"]
