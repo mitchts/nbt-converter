@@ -13,7 +13,7 @@ from converter import entity as Entity
 from converter import tileEntity as TileEntity
 from converter import util as Util
 
-VERSION = "1.3.0"
+VERSION = "1.3.1"
 
 def save_chunk(region, chunk):
     region.write_chunk(chunk.x, chunk.z, chunk)
@@ -58,7 +58,9 @@ def main(world_folder, options):
     version = Util.get_version(level)
 
     print("\nLoading level at " + world_folder)
-    if version != "1.8":
+    if version != "1.8" or options.force:
+        if options.force:
+            print("[Forcing level conversion attempt]")
         print("Level saved as Minecraft version " + version)
         try:
             total_nbt_edits = 0
@@ -97,6 +99,7 @@ if __name__ == "__main__":
     parser.add_option("-r", "--recursive", dest="recursive", help="run through nested folders", default=False, action="store_true")
     parser.add_option("-k", "--keep-inventory", dest="disable_keep_inv", help="turn the keepInventory gamerule off", default=False, action="store_true")
     parser.add_option("-n", "--no-save", dest="save", help="do not save modifications made", default=True, action="store_false")
+    parser.add_option("-f", "--force", dest="force", help="force the script to run on maps assumed to be 1.8", default=False, action="store_true")
     (options, args) = parser.parse_args()
 
     if len(sys.argv) == 1:
