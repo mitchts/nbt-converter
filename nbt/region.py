@@ -7,7 +7,10 @@ https://minecraft.gamepedia.com/Region_file_format
 
 from .nbt import NBTFile, MalformedFileError
 from struct import pack, unpack
-from collections import Mapping
+try:
+    from collections.abc import Mapping
+except ImportError:  # for Python 2.7
+    from collections import Mapping
 import zlib
 import gzip
 from io import BytesIO
@@ -198,6 +201,8 @@ class RegionFile(object):
         self.file = None
         self.filename = None
         self._closefile = False
+        self.closed = False
+        """Set to true if `close()` was successfully called on that region"""
         self.chunkclass = chunkclass
         if filename:
             self.filename = filename
@@ -287,6 +292,7 @@ class RegionFile(object):
         if self._closefile:
             try:
                 self.file.close()
+                self.closed = True
             except IOError:
                 pass
 
