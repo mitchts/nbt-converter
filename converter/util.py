@@ -23,18 +23,18 @@ def format_chunk(x, z):
 
 def minecraft_to_simple_id(s):
     # minecraft:mob_spawner -> mob_spawner
-    if "minecraft:" not in s:
+    if not isinstance(s, str) or "minecraft:" not in s:
         return s
     else:
         return s.split(":")[1]
 
 def simple_id_to_name(s):
     # mob_spawner -> MobSpawner
-    return "".join(map(lambda x:x.capitalize(),s.split("_")))
+    return "".join(map(lambda x:x.capitalize(),s.split("_"))) if isinstance(s, str) else s
 
 def minecraft_to_name(s):
     # minecraft:mob_spawner -> MobSpawner
-    return simple_id_to_name(minecraft_to_simple_id(s))
+    return simple_id_to_name(minecraft_to_simple_id(s)) if isinstance(s, str) else s
 
 def formatted_json_to_text(str):
     colors = {
@@ -64,7 +64,7 @@ def formatted_json_to_text(str):
         "reset": u"§r"
     }
     colors.update(functions)
-    
+
     text = ""
     # if the sign has multiple colours or specific characters formatted
     # the line will be split up into multiple sections so we need to
@@ -79,7 +79,7 @@ def formatted_json_to_text(str):
             sections.append(section)
     else:
         sections.append(json_str)
-    
+
     # go through the line and apply each of the function to the text
     # the order must follow color -> functions -> text otherwise it
     # wont display on the sign properly
@@ -163,5 +163,5 @@ def convert_entity_id(entity):
         new_id = legacy[entity]
     else:
         new_id = minecraft_to_name(entity)
-    
+
     return new_id

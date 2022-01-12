@@ -30,7 +30,7 @@ def convert_item_frame(frame):
     frame["id"].value = "ItemFrame"
     if frame.__contains__("Item"):
         if frame["Item"]["id"].value in Util.POTION_TYPES:
-            frame["Item"] = Item.convert_potion_item(frame["Item"]) 
+            frame["Item"] = Item.convert_potion_item(frame["Item"])
     return frame
 
 def convert_painting(painting):
@@ -58,10 +58,6 @@ def convert(entity, edits):
     entities = {
         "minecraft:armor_stand": convert_armor_stand,
         "minecraft:villager": convert_villager,
-        # honestly, fuck legacy minecraft versions and their bullshit
-        # have to include this as 1.9 doesn't use the minecraft:x id scheme for entities
-        # so this will likely affect other things for some maps, but villagers are the
-        # most important entity affected right now
         "Villager": convert_villager,
         "minecraft:item_frame": convert_item_frame,
         "minecraft:painting": convert_painting,
