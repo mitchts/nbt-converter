@@ -82,6 +82,12 @@ def convert(chunk):
     }
     modified = 0
     for s in chunk['Level']['Sections']:
+        # in some cases the section will not have any blocks,
+        # however it is unclear when or how this happens so
+        # putting a simple check here for when it does occur.
+        if not s.__contains__('Blocks'):
+            continue
+
         block_ids, indexes = fetch_section_blocks(s)
         for i, b in enumerate(block_ids):
             if b in replacements:
