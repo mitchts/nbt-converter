@@ -16,6 +16,9 @@ from converter import util as Util
 VERSION = "1.3.2"
 
 def save_chunk(region, chunk):
+    # Discard data version to avoid issues when upgrading the world back
+    if chunk.__contains__("DataVersion") and chunk["DataVersion"].value != 0:
+        chunk["DataVersion"].value = 0
     region.write_chunk(chunk.x, chunk.z, chunk)
 
 def save_level(level, world_folder):
