@@ -2,7 +2,7 @@
 Handles a single chunk of data (16x16x128 blocks) from a Minecraft save.
 
 For more information about the chunck format:
-https://minecraft.gamepedia.com/Chunk_format
+https://minecraft.wiki/w/Chunk_format
 """
 
 from io import BytesIO
@@ -13,7 +13,7 @@ import array
 
 # Legacy numeric block identifiers
 # mapped to alpha identifiers in best effort
-# See https://minecraft.gamepedia.com/Java_Edition_data_values/Pre-flattening
+# See https://minecraft.wiki/w/Java_Edition_data_values/Pre-flattening
 # TODO: move this map into a separate file
 
 block_ids = {
@@ -143,7 +143,7 @@ class AnvilSection(object):
         self.indexes = []
 
         # Is the section flattened ?
-        # See https://minecraft.gamepedia.com/1.13/Flattening
+        # See https://minecraft.wiki/w/1.13/Flattening
 
         if version == 0 or version == 1343:  # 1343 = MC 1.12.2
             self._init_array(nbt)
@@ -296,7 +296,7 @@ class AnvilChunk(Chunk):
         self.sections = {}
         if 'Sections' in self.chunk_data:
             for s in self.chunk_data['Sections']:
-                if "BlockStates" in s.keys(): # sections may only contain lighting information
+                if "BlockStates" in s.keys() or "Blocks" in s.keys(): # sections may only contain lighting information
                     self.sections[s['Y'].value] = AnvilSection(s, version)
 
 
