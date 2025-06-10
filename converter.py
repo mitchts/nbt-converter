@@ -44,7 +44,7 @@ def convert_chunk(chunk):
 def convert_block(chunk):
     return Block.convert(chunk)
 
-def disable_keep_inv(level, world_folder):
+def disable_keep_inventory(level, world_folder):
     if level["Data"].__contains__("GameRules"):
         if level["Data"]["GameRules"].__contains__("keepInventory"):
             level["Data"]["GameRules"]["keepInventory"].value = "false";
@@ -71,11 +71,12 @@ def main(world_folder, options):
             total_block_edits = 0
             for region in world.iter_regions():
                 for chunk in region.iter_chunks():
-                    chunk, nbt_edits = convert_chunk(chunk)
-                    chunk, block_edits = convert_block(chunk)
-                    total_nbt_edits += nbt_edits
-                    total_block_edits += block_edits
-                    if options.save and nbt_edits > 0 or block_edits > 0:
+                    if not options.discard_chunk_version or options.force:
+                        chunk, nbt_edits = convert_chunk(chunk)
+                        chunk, block_edits = convert_block(chunk)
+                        total_nbt_edits += nbt_edits
+                        total_block_edits += block_edits
+                    if options.save and (nbt_edits > 0 or block_edits > 0 or options.discard_chunk_version):
                         save_chunk(region, chunk)
             if total_nbt_edits > 0 or total_block_edits > 0:
                 print("%d modifications made to the level nbt" % (total_nbt_edits))
@@ -91,8 +92,8 @@ def main(world_folder, options):
     else:
         print("Level is already saved for Minecraft 1.8 (or older)")
 
-    if options.disable_keep_inv and options.save:
-        disable_keep_inv(level, world_folder)
+    if options.save and options.disable_keep_inventory:
+        disable_keep_inventory(level, world_folder)
 
     return 0
 
@@ -100,10 +101,26 @@ if __name__ == "__main__":
     print("Version " + VERSION)
     usage = "usage: %prog <dir> [options]"
     parser = OptionParser(usage=usage)
-    parser.add_option("-r", "--recursive", dest="recursive", help="run through nested folders", default=False, action="store_true")
-    parser.add_option("-k", "--keep-inventory", dest="disable_keep_inv", help="turn the keepInventory gamerule off", default=False, action="store_true")
-    parser.add_option("-n", "--no-save", dest="save", help="do not save modifications made", default=True, action="store_false")
-    parser.add_option("-f", "--force", dest="force", help="force the script to run on maps assumed to be 1.8", default=False, action="store_true")
+    parser.add_option("-r", "--recursive",
+                      dest="recursive",
+                      action="store_true", default=False,
+                      help="run through nested folders")
+    parser.add_option("-n", "--dry-run",
+                      dest="save",
+                      action="store_false", default=True,
+                      help="do not save modifications made")
+    parser.add_option("-f", "--force",
+                      dest="force",
+                      action="store_true", default=False,
+                      help="force the script to run on maps assumed to be 1.8")
+    parser.add_option("--disable-keep-inventory",
+                      dest="disable_keep_inventory",
+                      action="store_true", default=False,
+                      help="turn the keepInventory gamerule off")
+    parser.add_option("--discard-chunk-version",
+                      dest="discard_chunk_version",
+                      action="store_true", default=False,
+                      help="discards chunk version data - intended for maps already converted still with version data (will not attempt any conversions unless using -f)")
     (options, args) = parser.parse_args()
 
     if len(sys.argv) == 1:
